@@ -39,8 +39,8 @@
             android:minWidth="96dp"
             android:orientation="vertical">
 
-            <!-- Stunde und Minute rechtsbündig in gemeinsamer Spalte, damit die Ziffern
-                 auch ohne tnum-Unterstützung der Schrift an der rechten Kante fluchten -->
+            <!-- Stunde und Minute in gemeinsamer Spalte; Monospace-Schrift, weil tnum nicht
+                 von jeder Systemschrift unterstützt wird und die Ziffern sonst versetzt stehen -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                     android:id="@+id/clock_hour"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="monospace"
                     android:fontFeatureSettings="tnum"
                     android:format12Hour="HH"
                     android:format24Hour="HH"
@@ -65,7 +65,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="-2dp"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="monospace"
                     android:fontFeatureSettings="tnum"
                     android:format12Hour="mm"
                     android:format24Hour="mm"
