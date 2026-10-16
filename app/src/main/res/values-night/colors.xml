@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Automatisch, Nacht: dunkel (entspricht den mono_-Werten) -->
+    <color name="auto_bg_solid">#FF0A0A0A</color>
+    <color name="auto_bg_glass">#8C0A0A0A</color>
+    <color name="auto_text">#FFF5F5F5</color>
+    <color name="auto_muted_solid">#FF9A9A9A</color>
+    <color name="auto_muted_glass">#BDF5F5F5</color>
+    <color name="auto_accent">#FFD71921</color>
+    <color name="auto_dot_off_solid">#FF333333</color>
+    <color name="auto_dot_off_glass">#38FFFFFF</color>
+    <color name="auto_line_solid">#FF2A2A2A</color>
+    <color name="auto_line_glass">#2EFFFFFF</color>
+
+    <!-- Automatisch, Wallpaper-Farben, Nacht: dunkle Systemfarben -->
+    <color name="auto_adaptive_bg_solid">@android:color/system_accent2_900</color>
+    <color name="auto_adaptive_text">@android:color/system_accent2_50</color>
+    <color name="auto_adaptive_muted">@android:color/system_accent2_200</color>
+    <color name="auto_adaptive_accent">@android:color/system_accent1_200</color>
+</resources>

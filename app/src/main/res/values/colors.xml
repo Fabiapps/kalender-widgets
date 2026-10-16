@@ -19,4 +19,40 @@
     <color name="adaptive_accent">@android:color/system_accent1_200</color>
 
     <color name="icon_background">#FF0A0A0A</color>
+
+    <!-- Hell, klassisch -->
+    <color name="light_bg_solid">#FFF4F4F2</color>
+    <color name="light_bg_glass">#A8FFFFFF</color>
+    <color name="light_text">#FF111111</color>
+    <color name="light_muted_solid">#FF5C5C5C</color>
+    <color name="light_muted_glass">#B3111111</color>
+    <color name="light_accent">#FFD71921</color>
+    <color name="light_dot_off_solid">#FFCFCFCC</color>
+    <color name="light_dot_off_glass">#FFCFCFCC</color>
+    <color name="light_line_solid">#FFE2E2DF</color>
+    <color name="light_line_glass">#2E111111</color>
+
+    <!-- Hell, Wallpaper-Farben (Material You) -->
+    <color name="adaptive_light_bg_solid">@android:color/system_accent2_50</color>
+    <color name="adaptive_light_text">@android:color/system_accent2_900</color>
+    <color name="adaptive_light_muted">@android:color/system_accent2_600</color>
+    <color name="adaptive_light_accent">@android:color/system_accent1_600</color>
+
+    <!-- Automatisch (values/ = hell, values-night/ = dunkel) -->
+    <color name="auto_bg_solid">#FFF4F4F2</color>
+    <color name="auto_bg_glass">#A8FFFFFF</color>
+    <color name="auto_text">#FF111111</color>
+    <color name="auto_muted_solid">#FF5C5C5C</color>
+    <color name="auto_muted_glass">#B3111111</color>
+    <color name="auto_accent">#FFD71921</color>
+    <color name="auto_dot_off_solid">#FFCFCFCC</color>
+    <color name="auto_dot_off_glass">#FFCFCFCC</color>
+    <color name="auto_line_solid">#FFE2E2DF</color>
+    <color name="auto_line_glass">#2E111111</color>
+
+    <!-- Automatisch, Wallpaper-Farben (hell; values-night/ enthält die dunkle Variante) -->
+    <color name="auto_adaptive_bg_solid">@android:color/system_accent2_50</color>
+    <color name="auto_adaptive_text">@android:color/system_accent2_900</color>
+    <color name="auto_adaptive_muted">@android:color/system_accent2_600</color>
+    <color name="auto_adaptive_accent">@android:color/system_accent1_600</color>
 </resources>

@@ -4,19 +4,15 @@ import android.app.job.JobInfo
 import android.app.job.JobParameters
 import android.app.job.JobScheduler
 import android.app.job.JobService
+import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.provider.CalendarContract
 
-/**
- * Läuft, sobald sich im Kalender etwas ändert (neuer, verschobener oder gelöschter Termin),
- * damit das Widget nicht bis zum nächsten geplanten Update veraltet ist.
- */
 class CalendarChangeJob : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
         WidgetUpdater.updateAll(applicationContext)
-        // Content-Trigger feuern nur einmal, deshalb direkt wieder anmelden.
         schedule(applicationContext)
         return false
     }
@@ -43,6 +39,14 @@ class CalendarChangeJob : JobService() {
 
         fun cancel(context: Context) {
             context.getSystemService(JobScheduler::class.java)?.cancel(JOB_ID)
+        }
+
+        /** Bricht den Job nur ab, wenn weder Widget A noch B mehr vorhanden sind. */
+        fun cancelIfNoWidgets(context: Context) {
+            val mgr = AppWidgetManager.getInstance(context)
+            val hasA = mgr.getAppWidgetIds(ComponentName(context, NowNextWidget::class.java)).isNotEmpty()
+            val hasB = mgr.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java)).isNotEmpty()
+            if (!hasA && !hasB) cancel(context)
         }
     }
 }

@@ -2,6 +2,7 @@ package app.kalenderwidgets
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 
@@ -12,13 +13,20 @@ class NowNextWidget : AppWidgetProvider() {
         WidgetUpdater.updateAll(context)
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        for (id in appWidgetIds) WidgetPrefs.removeWidgetConfig(context, id)
+    }
+
     override fun onEnabled(context: Context) {
         CalendarChangeJob.schedule(context)
     }
 
     override fun onDisabled(context: Context) {
-        WidgetUpdater.cancelRefresh(context)
-        CalendarChangeJob.cancel(context)
+        val mgr = AppWidgetManager.getInstance(context)
+        if (mgr.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java)).isEmpty()) {
+            WidgetUpdater.cancelRefresh(context)
+        }
+        CalendarChangeJob.cancelIfNoWidgets(context)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -30,6 +38,7 @@ class NowNextWidget : AppWidgetProvider() {
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_LOCALE_CHANGED,
+            Intent.ACTION_CONFIGURATION_CHANGED,
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
                 WidgetUpdater.updateAll(context)
                 CalendarChangeJob.schedule(context)

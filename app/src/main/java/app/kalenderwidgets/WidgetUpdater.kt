@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.provider.CalendarContract
 import android.view.View
 import android.widget.RemoteViews
@@ -18,7 +19,27 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.ceil
 
-/** Baut das Widget zusammen und plant das nächste Update. */
+/** Alles, was das Widget zu einem Zeitpunkt anzeigen muss. */
+internal class Snapshot(
+    val now: Long,
+    val today: LocalDate,
+    val zone: ZoneId,
+    val hasPermission: Boolean,
+    val current: CalEvent?,
+    val nextTimed: CalEvent?,
+    val allDayToday: List<CalEvent>,
+    val nextAllDay: List<CalEvent>,
+    val allEvents: List<CalEvent>,
+) {
+    val allDayIsNext: Boolean
+        get() {
+            val allDayDate = nextAllDay.firstOrNull()?.firstDay(zone) ?: return false
+            val timedDate = nextTimed?.firstDay(zone) ?: return true
+            return !allDayDate.isAfter(timedDate)
+        }
+}
+
+/** Baut Widget A (Jetzt & Danach) zusammen und plant das nächste Update. */
 object WidgetUpdater {
 
     const val ACTION_REFRESH = "app.kalenderwidgets.action.REFRESH"
@@ -26,25 +47,20 @@ object WidgetUpdater {
     private const val MINUTE = 60_000L
     private const val HOUR = 60 * MINUTE
     private const val DAY = 24 * HOUR
-
-    /** Spätestens so oft wird aktualisiert, auch wenn nichts ansteht. */
     private const val MAX_INTERVAL = 15 * MINUTE
-
-    /** Unter dieser Restzeit zählt "IN X MIN" minutengenau herunter. */
     private const val COUNTDOWN_WINDOW = 90 * MINUTE
 
-    private val DOT_IDS = intArrayOf(
+    val DOT_IDS = intArrayOf(
         R.id.dot_0, R.id.dot_1, R.id.dot_2, R.id.dot_3, R.id.dot_4, R.id.dot_5, R.id.dot_6,
         R.id.dot_7, R.id.dot_8, R.id.dot_9, R.id.dot_10, R.id.dot_11, R.id.dot_12, R.id.dot_13,
     )
 
-    private val TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.GERMAN)
-    private val WEEKDAY = DateTimeFormatter.ofPattern("EEE", Locale.GERMAN)
-    private val DAY_MONTH = DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN)
-    private val WEEKDAY_DATE = DateTimeFormatter.ofPattern("EEE dd.MM.", Locale.GERMAN)
+    val TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.GERMAN)
+    val WEEKDAY: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE", Locale.GERMAN)
+    val DAY_MONTH: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN)
+    val WEEKDAY_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE dd.MM.", Locale.GERMAN)
 
-    /** Farb-Ressourcen je Modus. Die adaptiven verweisen auf die Material-You-Systemfarben. */
-    private data class Palette(
+    data class Palette(
         val background: Int,
         val text: Int,
         val muted: Int,
@@ -53,7 +69,21 @@ object WidgetUpdater {
         val line: Int,
     )
 
-    private fun palette(adaptive: Boolean, glass: Boolean): Palette =
+    fun palette(context: Context, widgetId: Int): Palette {
+        val appearance = WidgetPrefs.appearance(context, widgetId)
+        val adaptive = WidgetPrefs.widgetAdaptive(context, widgetId)
+        val glass = WidgetPrefs.widgetGlass(context, widgetId)
+        return palette(appearance, adaptive, glass)
+    }
+
+    fun palette(appearance: Appearance, adaptive: Boolean, glass: Boolean): Palette =
+        when (appearance) {
+            Appearance.DARK -> darkPalette(adaptive, glass)
+            Appearance.LIGHT -> lightPalette(adaptive, glass)
+            Appearance.AUTO -> autoPalette(adaptive, glass)
+        }
+
+    private fun darkPalette(adaptive: Boolean, glass: Boolean): Palette =
         if (adaptive) {
             Palette(
                 background = if (glass) R.color.adaptive_bg_glass else R.color.adaptive_bg_solid,
@@ -74,50 +104,80 @@ object WidgetUpdater {
             )
         }
 
-    /** Alles, was das Widget zu einem Zeitpunkt anzeigen muss. */
-    private class Snapshot(
-        val now: Long,
-        val today: LocalDate,
-        val zone: ZoneId,
-        val hasPermission: Boolean,
-        /** Laufender Termin mit Uhrzeit. */
-        val current: CalEvent?,
-        /** Nächster Termin mit Uhrzeit. */
-        val nextTimed: CalEvent?,
-        /** Ganztägige Termine, die heute stattfinden (auch mehrtägige). */
-        val allDayToday: List<CalEvent>,
-        /** Ganztägige Termine am nächsten Tag, an dem welche beginnen. */
-        val nextAllDay: List<CalEvent>,
-    ) {
-        /**
-         * Regel: Ein ganztägiger Termin zählt als Beginn seines Tages (00:00 Uhr).
-         * Liegt sein Tag vor oder auf dem Tag des nächsten Termins mit Uhrzeit,
-         * ist er das nächste Ereignis und erscheint unter "Danach".
-         *
-         * Sollen am selben Tag Termine mit Uhrzeit Vorrang haben, hier
-         * `!allDayDate.isAfter(timedDate)` durch `allDayDate.isBefore(timedDate)` ersetzen.
-         */
-        val allDayIsNext: Boolean
-            get() {
-                val allDayDate = nextAllDay.firstOrNull()?.firstDay(zone) ?: return false
-                val timedDate = nextTimed?.firstDay(zone) ?: return true
-                return !allDayDate.isAfter(timedDate)
-            }
-    }
+    private fun lightPalette(adaptive: Boolean, glass: Boolean): Palette =
+        if (adaptive) {
+            Palette(
+                background = if (glass) R.color.adaptive_light_bg_glass else R.color.adaptive_light_bg_solid,
+                text = R.color.adaptive_light_text,
+                muted = R.color.adaptive_light_muted,
+                accent = R.color.adaptive_light_accent,
+                dotOff = R.color.adaptive_light_dot_off,
+                line = R.color.adaptive_light_line,
+            )
+        } else {
+            Palette(
+                background = if (glass) R.color.light_bg_glass else R.color.light_bg_solid,
+                text = R.color.light_text,
+                muted = if (glass) R.color.light_muted_glass else R.color.light_muted_solid,
+                accent = R.color.light_accent,
+                dotOff = if (glass) R.color.light_dot_off_glass else R.color.light_dot_off_solid,
+                line = if (glass) R.color.light_line_glass else R.color.light_line_solid,
+            )
+        }
+
+    private fun autoPalette(adaptive: Boolean, glass: Boolean): Palette =
+        if (adaptive) {
+            Palette(
+                background = if (glass) R.color.auto_adaptive_bg_glass else R.color.auto_adaptive_bg_solid,
+                text = R.color.auto_adaptive_text,
+                muted = R.color.auto_adaptive_muted,
+                accent = R.color.auto_adaptive_accent,
+                dotOff = R.color.auto_adaptive_dot_off,
+                line = R.color.auto_adaptive_line,
+            )
+        } else {
+            Palette(
+                background = if (glass) R.color.auto_bg_glass else R.color.auto_bg_solid,
+                text = R.color.auto_text,
+                muted = if (glass) R.color.auto_muted_glass else R.color.auto_muted_solid,
+                accent = R.color.auto_accent,
+                dotOff = if (glass) R.color.auto_dot_off_glass else R.color.auto_dot_off_solid,
+                line = if (glass) R.color.auto_line_glass else R.color.auto_line_solid,
+            )
+        }
 
     fun updateAll(context: Context) {
         val manager = AppWidgetManager.getInstance(context)
-        val ids = manager.getAppWidgetIds(ComponentName(context, NowNextWidget::class.java))
-        if (ids.isEmpty()) {
+        val nowNextIds = manager.getAppWidgetIds(ComponentName(context, NowNextWidget::class.java))
+        val dayBarIds = manager.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java))
+        if (nowNextIds.isEmpty() && dayBarIds.isEmpty()) {
             cancelRefresh(context)
             return
         }
         val snapshot = loadSnapshot(context, System.currentTimeMillis())
-        manager.updateAppWidget(ids, buildViews(context, snapshot))
+        for (id in nowNextIds) {
+            manager.updateAppWidget(id, buildNowNextViews(context, id, snapshot))
+        }
+        for (id in dayBarIds) {
+            val options = manager.getAppWidgetOptions(id)
+            manager.updateAppWidget(id, DayBarUpdater.buildViews(context, id, snapshot, options))
+        }
         scheduleRefresh(context, nextRefreshTime(snapshot))
     }
 
-    private fun loadSnapshot(context: Context, now: Long): Snapshot {
+    fun updateNowNext(context: Context, widgetId: Int) {
+        val manager = AppWidgetManager.getInstance(context)
+        val snapshot = loadSnapshot(context, System.currentTimeMillis())
+        manager.updateAppWidget(widgetId, buildNowNextViews(context, widgetId, snapshot))
+    }
+
+    fun updateDayBar(context: Context, widgetId: Int, options: Bundle) {
+        val manager = AppWidgetManager.getInstance(context)
+        val snapshot = loadSnapshot(context, System.currentTimeMillis())
+        manager.updateAppWidget(widgetId, DayBarUpdater.buildViews(context, widgetId, snapshot, options))
+    }
+
+    internal fun loadSnapshot(context: Context, now: Long): Snapshot {
         val zone = ZoneId.systemDefault()
         val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
         val hasPermission = CalendarRepository.hasPermission(context)
@@ -127,33 +187,23 @@ object WidgetUpdater {
             emptyList()
         }
         val (allDay, timed) = events.partition { it.allDay }
-
-        // Laufen mehrere Termine gleichzeitig, gewinnt der zuletzt begonnene.
         val current = timed.filter { it.begin <= now && now < it.end }.maxByOrNull { it.begin }
         val nextTimed = timed.firstOrNull { it.begin > now }
-
-        // Heute: zuletzt begonnene zuerst (z. B. Geburtstag vor dem laufenden Urlaub).
         val allDayToday = allDay
             .filter { !it.firstDay(zone).isAfter(today) && !it.lastDay(zone).isBefore(today) }
             .sortedWith(compareByDescending<CalEvent> { it.firstDay(zone) }.thenBy { it.title })
-
         val nextAllDayDate = allDay.map { it.firstDay(zone) }.filter { it.isAfter(today) }.minOrNull()
-        val nextAllDay = if (nextAllDayDate == null) {
-            emptyList()
-        } else {
-            allDay.filter { it.firstDay(zone) == nextAllDayDate }.sortedBy { it.title }
-        }
-
-        return Snapshot(now, today, zone, hasPermission, current, nextTimed, allDayToday, nextAllDay)
+        val nextAllDay = if (nextAllDayDate == null) emptyList()
+        else allDay.filter { it.firstDay(zone) == nextAllDayDate }.sortedBy { it.title }
+        return Snapshot(now, today, zone, hasPermission, current, nextTimed, allDayToday, nextAllDay, events)
     }
 
-    private fun buildViews(context: Context, s: Snapshot): RemoteViews {
-        val glass = WidgetPrefs.glass(context)
-        val p = palette(WidgetPrefs.adaptiveColors(context), glass)
+    private fun buildNowNextViews(context: Context, widgetId: Int, s: Snapshot): RemoteViews {
+        val glass = WidgetPrefs.widgetGlass(context, widgetId)
+        val p = palette(context, widgetId)
+        val base = widgetId * 100
         val v = RemoteViews(context.packageName, R.layout.widget_now_next)
 
-        // Farben: werden als Ressource übergeben, damit der Launcher sie beim
-        // Wallpaper-Wechsel selbst neu auflöst.
         v.setColorStateList(R.id.bg_fill, "setImageTintList", p.background)
         v.setViewVisibility(R.id.bg_stroke, if (glass) View.VISIBLE else View.GONE)
         for (id in intArrayOf(
@@ -169,7 +219,7 @@ object WidgetUpdater {
         v.setColorStateList(R.id.allday_ring, "setImageTintList", p.muted)
         v.setColorStateList(R.id.divider, "setImageTintList", p.line)
 
-        v.setOnClickPendingIntent(android.R.id.background, calendarIntent(context, s.now))
+        v.setOnClickPendingIntent(android.R.id.background, calendarIntent(context, s.now, base + 3))
 
         if (!s.hasPermission) {
             v.setViewVisibility(R.id.allday_row, View.GONE)
@@ -180,11 +230,10 @@ object WidgetUpdater {
             v.setViewVisibility(R.id.dots, View.GONE)
             v.setViewVisibility(R.id.divider, View.GONE)
             v.setViewVisibility(R.id.next_block, View.GONE)
-            v.setOnClickPendingIntent(android.R.id.background, settingsIntent(context))
+            v.setOnClickPendingIntent(android.R.id.background, settingsIntent(context, base + 4))
             return v
         }
 
-        // Zeile "Ganztägig heute" (Ring statt Punkt, bei mehreren "+N")
         val firstAllDay = s.allDayToday.firstOrNull()
         if (firstAllDay != null) {
             v.setViewVisibility(R.id.allday_row, View.VISIBLE)
@@ -196,12 +245,11 @@ object WidgetUpdater {
             } else {
                 v.setViewVisibility(R.id.allday_count, View.GONE)
             }
-            v.setOnClickPendingIntent(R.id.allday_row, eventIntent(context, firstAllDay, 5))
+            v.setOnClickPendingIntent(R.id.allday_row, eventIntent(context, firstAllDay, base + 5))
         } else {
             v.setViewVisibility(R.id.allday_row, View.GONE)
         }
 
-        // Block "Jetzt" (nur Termine mit Uhrzeit)
         v.setTextViewText(R.id.now_label, "JETZT")
         val current = s.current
         if (current != null) {
@@ -213,7 +261,7 @@ object WidgetUpdater {
             DOT_IDS.forEachIndexed { index, id ->
                 v.setColorStateList(id, "setImageTintList", if (index < filled) p.accent else p.dotOff)
             }
-            v.setOnClickPendingIntent(R.id.now_block, eventIntent(context, current, 1))
+            v.setOnClickPendingIntent(R.id.now_block, eventIntent(context, current, base + 1))
         } else {
             v.setColorStateList(R.id.now_dot, "setImageTintList", p.dotOff)
             v.setTextViewText(R.id.now_title, "Frei")
@@ -223,7 +271,6 @@ object WidgetUpdater {
             v.setViewVisibility(R.id.dots, View.GONE)
         }
 
-        // Block "Danach"
         v.setViewVisibility(R.id.divider, View.VISIBLE)
         v.setViewVisibility(R.id.next_block, View.VISIBLE)
         val nextTimed = s.nextTimed
@@ -234,14 +281,14 @@ object WidgetUpdater {
                 v.setTextViewText(R.id.next_title, first.title)
                 v.setTextViewText(R.id.next_time, allDayDetails(s.nextAllDay, s.zone))
                 v.setViewVisibility(R.id.next_time, View.VISIBLE)
-                v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, first, 2))
+                v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, first, base + 2))
             }
             nextTimed != null -> {
                 v.setTextViewText(R.id.next_label, "DANACH · " + relativeLabel(nextTimed.begin, s.now, s.zone))
                 v.setTextViewText(R.id.next_title, nextTimed.title)
                 v.setTextViewText(R.id.next_time, timeRange(nextTimed))
                 v.setViewVisibility(R.id.next_time, View.VISIBLE)
-                v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, nextTimed, 2))
+                v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, nextTimed, base + 2))
             }
             else -> {
                 v.setTextViewText(R.id.next_label, "DANACH")
@@ -252,14 +299,14 @@ object WidgetUpdater {
         return v
     }
 
-    // ---------- Texte ----------
+    // ---------- Texthilfen (intern + für DayBarUpdater zugänglich) ----------
 
-    private fun filledDots(event: CalEvent, now: Long): Int {
+    fun filledDots(event: CalEvent, now: Long): Int {
         val duration = (event.end - event.begin).coerceAtLeast(1)
         return ((now - event.begin) * DOT_IDS.size / duration).toInt().coerceIn(0, DOT_IDS.size)
     }
 
-    private fun relativeLabel(begin: Long, now: Long, zone: ZoneId): String {
+    fun relativeLabel(begin: Long, now: Long, zone: ZoneId): String {
         val minutes = ceil((begin - now) / MINUTE.toDouble()).toLong().coerceAtLeast(1)
         if (minutes * MINUTE < COUNTDOWN_WINDOW) return "IN $minutes MIN"
         val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
@@ -267,12 +314,10 @@ object WidgetUpdater {
         return if (day == today) "IN ${minutes / 60} STD" else dayLabel(day, today)
     }
 
-    /** "MORGEN" oder z. B. "DO. 15.10." */
-    private fun dayLabel(day: LocalDate, today: LocalDate): String =
+    fun dayLabel(day: LocalDate, today: LocalDate): String =
         if (day == today.plusDays(1)) "MORGEN" else WEEKDAY_DATE.format(day).uppercase(Locale.GERMAN)
 
-    /** z. B. "ganztägig", "ganztägig · bis Fr." oder "ganztägig · +1" */
-    private fun allDayDetails(group: List<CalEvent>, zone: ZoneId): String {
+    fun allDayDetails(group: List<CalEvent>, zone: ZoneId): String {
         val first = group.first()
         val start = first.firstDay(zone)
         val last = first.lastDay(zone)
@@ -286,19 +331,14 @@ object WidgetUpdater {
         }
     }
 
-    private fun clock(time: Long): String =
+    fun clock(time: Long): String =
         Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()).format(TIME)
 
-    private fun timeRange(event: CalEvent): String = "${clock(event.begin)} – ${clock(event.end)}"
+    fun timeRange(event: CalEvent): String = "${clock(event.begin)} – ${clock(event.end)}"
 
     // ---------- Updates planen ----------
 
-    /**
-     * Nächster sinnvoller Zeitpunkt für ein Update: Terminbeginn/-ende, nächster
-     * Fortschrittspunkt, minütlicher Countdown kurz vor einem Termin, Mitternacht
-     * (dann wechseln die ganztägigen Termine) und spätestens alle 15 Minuten.
-     */
-    private fun nextRefreshTime(s: Snapshot): Long {
+    internal fun nextRefreshTime(s: Snapshot): Long {
         val now = s.now
         var t = now + MAX_INTERVAL
         s.current?.let { current ->
@@ -328,10 +368,8 @@ object WidgetUpdater {
     }
 
     private fun scheduleRefresh(context: Context, at: Long) {
-        val alarms = context.getSystemService(AlarmManager::class.java) ?: return
-        // RTC ohne Wakeup: Bei ausgeschaltetem Display wird das Handy nicht geweckt.
-        // Verpasste Updates holt Android nach, sobald das Display wieder an ist.
-        alarms.set(AlarmManager.RTC, at, refreshIntent(context))
+        context.getSystemService(AlarmManager::class.java)
+            ?.set(AlarmManager.RTC, at, refreshIntent(context))
     }
 
     fun cancelRefresh(context: Context) {
@@ -340,26 +378,22 @@ object WidgetUpdater {
 
     // ---------- Antippen ----------
 
-    private fun activityIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent =
+    fun activityIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent =
         PendingIntent.getActivity(
             context, requestCode, intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-    /** Öffnet die Kalender-App beim heutigen Tag. */
-    private fun calendarIntent(context: Context, now: Long): PendingIntent {
+    fun calendarIntent(context: Context, now: Long, requestCode: Int): PendingIntent {
         val zone = ZoneId.systemDefault()
         val startOfToday = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
             .atStartOfDay(zone).toInstant().toEpochMilli()
         val uri = CalendarContract.CONTENT_URI.buildUpon()
-            .appendPath("time")
-            .appendPath(startOfToday.toString())
-            .build()
-        return activityIntent(context, 3, Intent(Intent.ACTION_VIEW, uri))
+            .appendPath("time").appendPath(startOfToday.toString()).build()
+        return activityIntent(context, requestCode, Intent(Intent.ACTION_VIEW, uri))
     }
 
-    /** Öffnet den Termin in der Kalender-App. */
-    private fun eventIntent(context: Context, event: CalEvent, requestCode: Int): PendingIntent {
+    fun eventIntent(context: Context, event: CalEvent, requestCode: Int): PendingIntent {
         val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id)
         val intent = Intent(Intent.ACTION_VIEW, uri)
             .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
@@ -368,6 +402,6 @@ object WidgetUpdater {
         return activityIntent(context, requestCode, intent)
     }
 
-    private fun settingsIntent(context: Context): PendingIntent =
-        activityIntent(context, 4, Intent(context, MainActivity::class.java))
+    fun settingsIntent(context: Context, requestCode: Int): PendingIntent =
+        activityIntent(context, requestCode, Intent(context, MainActivity::class.java))
 }

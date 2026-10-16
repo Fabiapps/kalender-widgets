@@ -1,10 +1,15 @@
 # Kalender-Widgets
 
-Android-Widget **„Jetzt & Danach“**: große Uhr, aktueller Termin mit Fortschrittspunkten und nächster Termin.
-In der App lassen sich **Wallpaper-Farben** (Material You) und **Transparenz** an- und ausschalten.
+Zwei Android-Widgets für den Homescreen:
+
+- **„Jetzt & Danach"** (4×2): große Uhr, aktueller Termin mit Fortschrittspunkten, nächster Termin.
+- **„Tagesleiste"** (4×2): Uhrzeit, Canvas-Zeitleiste des heutigen Tages, laufender und nächster Termin.
+
+Jedes Widget ist einzeln konfigurierbar (Erscheinungsbild, Wallpaper-Farben, Transparenz).
+In der App lassen sich die **Standardwerte für neue Widgets** einstellen.
 
 > Hinweis: Der Code wurde nicht auf einem echten Gerät getestet. Wenn der Build fehlschlägt oder das Widget
-> „Widget kann nicht geladen werden“ anzeigt, das Fehlerprotokoll kopieren und zurückmelden.
+> „Widget kann nicht geladen werden" anzeigt, das Fehlerprotokoll kopieren und zurückmelden.
 
 Voraussetzung: Android 12 oder neuer, ein GitHub-Konto.
 
@@ -29,7 +34,6 @@ base64 -w0 release.jks > release.b64
 ## 2. Repository anlegen und Schlüssel hinterlegen
 
 1. Auf github.com: **New repository**, Name z. B. `kalender-widgets`, ohne README erstellen.
-   Öffentlich ist für Updates per Obtainium einfacher; im Code stehen keine persönlichen Daten.
 2. Im Repository: **Settings → Secrets and variables → Actions → New repository secret**
    - `KEYSTORE_BASE64` = kompletter Inhalt der Datei `release.b64`
    - `KEYSTORE_PASSWORD` = dein Passwort aus Schritt 1
@@ -38,17 +42,14 @@ base64 -w0 release.jks > release.b64
 ## 3. Dateien hochladen
 
 1. ZIP entpacken.
-2. Im leeren Repository auf **„uploading an existing file“** klicken.
+2. Im leeren Repository auf **„uploading an existing file"** klicken.
 3. Den **Inhalt** des Ordners `kalender-widgets` hineinziehen, nicht den Ordner selbst.
    Der Ordner `.github` ist versteckt: im Dateimanager mit **Strg+H** einblenden und mit auswählen.
 4. **Commit changes**.
 
-Falls `.github` beim Hochladen fehlt: **Add file → Create new file**, als Namen `.github/workflows/build.yml`
-eintippen und den Inhalt der Datei hineinkopieren.
-
 ## 4. Build abwarten
 
-- Reiter **Actions**: Der Lauf „APK bauen“ startet automatisch und dauert ein paar Minuten.
+- Reiter **Actions**: Der Lauf „APK bauen" startet automatisch und dauert ein paar Minuten.
 - Grüner Haken = fertig. Die APK liegt dann rechts auf der Repo-Startseite unter **Releases**.
 - Roter Fehler: auf den Lauf klicken, das Protokoll des fehlgeschlagenen Schritts kopieren und zurückmelden.
 - Neu bauen ohne Änderung: **Actions → APK bauen → Run workflow**.
@@ -56,43 +57,54 @@ eintippen und den Inhalt der Datei hineinkopieren.
 ## 5. Auf dem Handy installieren
 
 - Release-Seite im Handy-Browser öffnen, `.apk` herunterladen und öffnen.
-  Beim ersten Mal muss der Browser die Installation unbekannter Apps erlauben.
-  Play Protect kann warnen, weil die App nicht aus dem Play Store kommt.
-- Bequemer für Updates: die Open-Source-App **Obtainium** installieren und dort die URL deines Repositorys
-  hinzufügen. Bei einem privaten Repository braucht Obtainium einen GitHub-Zugangstoken.
+- Bequemer für Updates: **Obtainium** installieren und dort die URL des Repositorys eintragen.
 
 ## 6. Einrichten
 
 1. App **Kalender-Widgets** öffnen und **Kalenderzugriff erlauben**.
-2. Homescreen gedrückt halten → **Widgets** → **Kalender-Widgets** → **Jetzt & Danach** ziehen.
-3. Schalter für Wallpaper-Farben und Transparenz in der App nach Geschmack setzen.
-
-**Arbeitskalender:** Das Widget sieht nur Kalender, die in die Android-Kalenderdatenbank synchronisiert werden.
-Bei der Outlook-App muss die Kalender-Synchronisierung in deren Einstellungen aktiv sein.
+2. Standardwerte einstellen: Erscheinungsbild (Dunkel / Hell / Automatisch), Wallpaper-Farben, Transparenz.
+3. Homescreen gedrückt halten → **Widgets** → **Kalender-Widgets** → Widget ziehen.
+4. Beim Hinzufügen öffnet sich ein Einrichtungsdialog für dieses Widget.
+   Nachträglich: Widget gedrückt halten → **Widget bearbeiten**.
 
 ---
 
-## Verhalten im Überblick
+## Widgets im Überblick
+
+### Jetzt & Danach
+
+- **Oben rechts:** ganztägige Termine heute (hohler Ring, bei mehreren „+N").
+- **Jetzt:** laufender Termin mit Uhrzeit und Fortschrittspunkten; ohne Termin „Frei – bis …".
+- **Danach:** nächster Termin mit Zeitstempel oder ganztägiger Termin.
+
+### Tagesleiste
+
+- **Kopfzeile:** aktuelle Uhrzeit links; Wochentag, Datum und ganztägige Termine heute rechts.
+- **Zeitleiste:** Canvas-Bitmap, Zeitraum 08–20 Uhr (erweitert auf heutige Termine).
+  Vergangene Termine gedämpft, laufender in Akzentfarbe, zukünftige in Textfarbe.
+  Senkrechter Strich = jetzt. Darunter 5 Stundenlabels.
+- **Fußzeile:** links aktueller Termin mit Endzeit (oder „Frei"), rechts nächster mit Startzeit.
+
+### Erscheinungsbild
+
+| Modus | Klassisch | Wallpaper-Farben |
+|-------|-----------|-----------------|
+| **Dunkel** | Schwarz, roter Akzent | Material-You-Dunkelpalette |
+| **Hell** | Hellgrau #F4F4F2, roter Akzent | Material-You-Hellpalette |
+| **Automatisch** | Folgt System-Dark-Mode | Folgt Dark-Mode + Wallpaper |
+
+### Gemeinsames Verhalten
 
 - **Angezeigt:** sichtbare Kalender, ohne abgesagte und von dir abgelehnte Termine.
-  Laufen zwei Termine gleichzeitig, wird der zuletzt begonnene gezeigt.
-- **Ganztägige Termine heute:** eigene Zeile oben rechts mit hohlem Ring, bei mehreren mit „+N“.
-  Mehrtägige Termine (z. B. Urlaub) erscheinen an jedem ihrer Tage. „Jetzt“ zeigt weiterhin nur Termine mit Uhrzeit.
-- **Ganztägige Termine danach:** Sie zählen als Beginn ihres Tages (00:00 Uhr). Liegt ihr Tag vor oder auf dem Tag
-  des nächsten Termins mit Uhrzeit, stehen sie unter „Danach“, z. B. „DANACH · MORGEN / Feiertag / ganztägig“.
-  Um Mitternacht wandern sie in die Zeile für heute. Wer am selben Tag lieber den Termin mit Uhrzeit sehen will:
-  In `WidgetUpdater.kt` steht bei `allDayIsNext`, welche Zeile dafür zu ändern ist.
-- **Kein Termin gerade:** „Frei – bis 15:00“ bzw. „für heute“.
-- **Antippen:** Termin öffnet sich in der Kalender-App, der Rest des Widgets öffnet den heutigen Tag.
-- **Aktualisierung:** bei Änderungen im Kalender, zu Terminbeginn und -ende, mit jedem Fortschrittspunkt,
-  in den 90 Minuten vor einem Termin minütlich, sonst spätestens alle 15 Minuten.
-  Bei ausgeschaltetem Display wird das Handy dafür nicht geweckt.
-- **Kein Internetzugriff:** Die App fordert keine Internet-Berechtigung an.
+- **Antippen:** Termin öffnet sich in der Kalender-App, Rest öffnet den heutigen Tag.
+- **Aktualisierung:** bei Kalenderänderungen, zu Terminbeginn/-ende, minütlicher Countdown
+  90 Min vor einem Termin, sonst alle 15 Minuten. Kein Wakeup bei ausgeschaltetem Display.
+- **Kein Internetzugriff** angefordert.
 
 ## Bekannte Grenzen
 
-- **Schrift:** Das Widget nutzt die Systemschrift. Ist auf dem Handy Geist als Systemschrift eingestellt,
-  erscheint das Widget vermutlich in Geist – das ist nicht getestet. Für Labels wird die System-Monospace-Schrift genutzt.
-- **Kein echter Blur:** Der Transparenz-Modus ist halbtransparent mit feiner Kante, ohne Weichzeichnung.
-- **Sideloading-Regeln:** Google führt eine Verifizierungspflicht für App-Entwickler ein, die laut Berichten
-  ab 2027 weltweit greifen soll. Danach kann für selbst gebaute Apps ein zusätzlicher Installationsweg nötig sein.
+- **Schrift:** Das Widget nutzt die Systemschrift.
+- **Kein echter Blur:** Transparenz-Modus ist halbtransparent ohne Weichzeichnung.
+- **Zeitleiste** nutzt `setImageViewBitmap`: bei Farbwechsel (Automatisch + Dark-Mode-Toggle)
+  wird das Bitmap beim nächsten Update (spätestens 15 Min) neu gezeichnet. Für sofortigen
+  Wechsel: App öffnen oder Widget aktualisieren.

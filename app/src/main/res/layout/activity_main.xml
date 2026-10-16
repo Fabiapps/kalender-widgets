@@ -31,11 +31,55 @@
             android:layout_marginTop="8dp"
             android:text="@string/grant_permission" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/setting_appearance"
+            android:textSize="17sp" />
+
+        <RadioGroup
+            android:id="@+id/rg_default_appearance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_default_dark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/appearance_dark" />
+
+            <RadioButton
+                android:id="@+id/rb_default_light"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/appearance_light" />
+
+            <RadioButton
+                android:id="@+id/rb_default_auto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/appearance_auto" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:alpha="0.75"
+            android:text="@string/setting_appearance_hint"
+            android:textSize="13sp" />
+
         <Switch
             android:id="@+id/switch_adaptive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:minHeight="48dp"
             android:text="@string/setting_adaptive"
             android:textSize="17sp" />
