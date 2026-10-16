@@ -1,0 +1,9 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+# Signaturschlüssel niemals hochladen
+*.jks
+*.keystore
+*.b64

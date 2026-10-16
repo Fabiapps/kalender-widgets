@@ -1,0 +1,373 @@
+package app.kalenderwidgets
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.ContentUris
+import android.content.Context
+import android.content.Intent
+import android.provider.CalendarContract
+import android.view.View
+import android.widget.RemoteViews
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.Locale
+import kotlin.math.ceil
+
+/** Baut das Widget zusammen und plant das nächste Update. */
+object WidgetUpdater {
+
+    const val ACTION_REFRESH = "app.kalenderwidgets.action.REFRESH"
+
+    private const val MINUTE = 60_000L
+    private const val HOUR = 60 * MINUTE
+    private const val DAY = 24 * HOUR
+
+    /** Spätestens so oft wird aktualisiert, auch wenn nichts ansteht. */
+    private const val MAX_INTERVAL = 15 * MINUTE
+
+    /** Unter dieser Restzeit zählt "IN X MIN" minutengenau herunter. */
+    private const val COUNTDOWN_WINDOW = 90 * MINUTE
+
+    private val DOT_IDS = intArrayOf(
+        R.id.dot_0, R.id.dot_1, R.id.dot_2, R.id.dot_3, R.id.dot_4, R.id.dot_5, R.id.dot_6,
+        R.id.dot_7, R.id.dot_8, R.id.dot_9, R.id.dot_10, R.id.dot_11, R.id.dot_12, R.id.dot_13,
+    )
+
+    private val TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.GERMAN)
+    private val WEEKDAY = DateTimeFormatter.ofPattern("EEE", Locale.GERMAN)
+    private val DAY_MONTH = DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN)
+    private val WEEKDAY_DATE = DateTimeFormatter.ofPattern("EEE dd.MM.", Locale.GERMAN)
+
+    /** Farb-Ressourcen je Modus. Die adaptiven verweisen auf die Material-You-Systemfarben. */
+    private data class Palette(
+        val background: Int,
+        val text: Int,
+        val muted: Int,
+        val accent: Int,
+        val dotOff: Int,
+        val line: Int,
+    )
+
+    private fun palette(adaptive: Boolean, glass: Boolean): Palette =
+        if (adaptive) {
+            Palette(
+                background = if (glass) R.color.adaptive_bg_glass else R.color.adaptive_bg_solid,
+                text = R.color.adaptive_text,
+                muted = R.color.adaptive_muted,
+                accent = R.color.adaptive_accent,
+                dotOff = R.color.adaptive_dot_off,
+                line = R.color.adaptive_line,
+            )
+        } else {
+            Palette(
+                background = if (glass) R.color.mono_bg_glass else R.color.mono_bg_solid,
+                text = R.color.mono_text,
+                muted = if (glass) R.color.mono_muted_glass else R.color.mono_muted_solid,
+                accent = R.color.mono_accent,
+                dotOff = if (glass) R.color.mono_dot_off_glass else R.color.mono_dot_off_solid,
+                line = if (glass) R.color.mono_line_glass else R.color.mono_line_solid,
+            )
+        }
+
+    /** Alles, was das Widget zu einem Zeitpunkt anzeigen muss. */
+    private class Snapshot(
+        val now: Long,
+        val today: LocalDate,
+        val zone: ZoneId,
+        val hasPermission: Boolean,
+        /** Laufender Termin mit Uhrzeit. */
+        val current: CalEvent?,
+        /** Nächster Termin mit Uhrzeit. */
+        val nextTimed: CalEvent?,
+        /** Ganztägige Termine, die heute stattfinden (auch mehrtägige). */
+        val allDayToday: List<CalEvent>,
+        /** Ganztägige Termine am nächsten Tag, an dem welche beginnen. */
+        val nextAllDay: List<CalEvent>,
+    ) {
+        /**
+         * Regel: Ein ganztägiger Termin zählt als Beginn seines Tages (00:00 Uhr).
+         * Liegt sein Tag vor oder auf dem Tag des nächsten Termins mit Uhrzeit,
+         * ist er das nächste Ereignis und erscheint unter "Danach".
+         *
+         * Sollen am selben Tag Termine mit Uhrzeit Vorrang haben, hier
+         * `!allDayDate.isAfter(timedDate)` durch `allDayDate.isBefore(timedDate)` ersetzen.
+         */
+        val allDayIsNext: Boolean
+            get() {
+                val allDayDate = nextAllDay.firstOrNull()?.firstDay(zone) ?: return false
+                val timedDate = nextTimed?.firstDay(zone) ?: return true
+                return !allDayDate.isAfter(timedDate)
+            }
+    }
+
+    fun updateAll(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, NowNextWidget::class.java))
+        if (ids.isEmpty()) {
+            cancelRefresh(context)
+            return
+        }
+        val snapshot = loadSnapshot(context, System.currentTimeMillis())
+        manager.updateAppWidget(ids, buildViews(context, snapshot))
+        scheduleRefresh(context, nextRefreshTime(snapshot))
+    }
+
+    private fun loadSnapshot(context: Context, now: Long): Snapshot {
+        val zone = ZoneId.systemDefault()
+        val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
+        val hasPermission = CalendarRepository.hasPermission(context)
+        val events = if (hasPermission) {
+            CalendarRepository.loadEvents(context, now - DAY, now + 8 * DAY)
+        } else {
+            emptyList()
+        }
+        val (allDay, timed) = events.partition { it.allDay }
+
+        // Laufen mehrere Termine gleichzeitig, gewinnt der zuletzt begonnene.
+        val current = timed.filter { it.begin <= now && now < it.end }.maxByOrNull { it.begin }
+        val nextTimed = timed.firstOrNull { it.begin > now }
+
+        // Heute: zuletzt begonnene zuerst (z. B. Geburtstag vor dem laufenden Urlaub).
+        val allDayToday = allDay
+            .filter { !it.firstDay(zone).isAfter(today) && !it.lastDay(zone).isBefore(today) }
+            .sortedWith(compareByDescending<CalEvent> { it.firstDay(zone) }.thenBy { it.title })
+
+        val nextAllDayDate = allDay.map { it.firstDay(zone) }.filter { it.isAfter(today) }.minOrNull()
+        val nextAllDay = if (nextAllDayDate == null) {
+            emptyList()
+        } else {
+            allDay.filter { it.firstDay(zone) == nextAllDayDate }.sortedBy { it.title }
+        }
+
+        return Snapshot(now, today, zone, hasPermission, current, nextTimed, allDayToday, nextAllDay)
+    }
+
+    private fun buildViews(context: Context, s: Snapshot): RemoteViews {
+        val glass = WidgetPrefs.glass(context)
+        val p = palette(WidgetPrefs.adaptiveColors(context), glass)
+        val v = RemoteViews(context.packageName, R.layout.widget_now_next)
+
+        // Farben: werden als Ressource übergeben, damit der Launcher sie beim
+        // Wallpaper-Wechsel selbst neu auflöst.
+        v.setColorStateList(R.id.bg_fill, "setImageTintList", p.background)
+        v.setViewVisibility(R.id.bg_stroke, if (glass) View.VISIBLE else View.GONE)
+        for (id in intArrayOf(
+            R.id.clock_hour, R.id.clock_minute, R.id.now_title, R.id.next_title, R.id.allday_title,
+        )) {
+            v.setColorStateList(id, "setTextColor", p.text)
+        }
+        for (id in intArrayOf(
+            R.id.date, R.id.now_label, R.id.now_time, R.id.next_label, R.id.next_time, R.id.allday_count,
+        )) {
+            v.setColorStateList(id, "setTextColor", p.muted)
+        }
+        v.setColorStateList(R.id.allday_ring, "setImageTintList", p.muted)
+        v.setColorStateList(R.id.divider, "setImageTintList", p.line)
+
+        v.setOnClickPendingIntent(android.R.id.background, calendarIntent(context, s.now))
+
+        if (!s.hasPermission) {
+            v.setViewVisibility(R.id.allday_row, View.GONE)
+            v.setColorStateList(R.id.now_dot, "setImageTintList", p.dotOff)
+            v.setTextViewText(R.id.now_label, "KALENDER")
+            v.setTextViewText(R.id.now_title, "Zugriff fehlt")
+            v.setTextViewText(R.id.now_time, "Tippen zum Einrichten")
+            v.setViewVisibility(R.id.dots, View.GONE)
+            v.setViewVisibility(R.id.divider, View.GONE)
+            v.setViewVisibility(R.id.next_block, View.GONE)
+            v.setOnClickPendingIntent(android.R.id.background, settingsIntent(context))
+            return v
+        }
+
+        // Zeile "Ganztägig heute" (Ring statt Punkt, bei mehreren "+N")
+        val firstAllDay = s.allDayToday.firstOrNull()
+        if (firstAllDay != null) {
+            v.setViewVisibility(R.id.allday_row, View.VISIBLE)
+            v.setTextViewText(R.id.allday_title, firstAllDay.title)
+            val more = s.allDayToday.size - 1
+            if (more > 0) {
+                v.setTextViewText(R.id.allday_count, "+$more")
+                v.setViewVisibility(R.id.allday_count, View.VISIBLE)
+            } else {
+                v.setViewVisibility(R.id.allday_count, View.GONE)
+            }
+            v.setOnClickPendingIntent(R.id.allday_row, eventIntent(context, firstAllDay, 5))
+        } else {
+            v.setViewVisibility(R.id.allday_row, View.GONE)
+        }
+
+        // Block "Jetzt" (nur Termine mit Uhrzeit)
+        v.setTextViewText(R.id.now_label, "JETZT")
+        val current = s.current
+        if (current != null) {
+            v.setColorStateList(R.id.now_dot, "setImageTintList", p.accent)
+            v.setTextViewText(R.id.now_title, current.title)
+            v.setTextViewText(R.id.now_time, timeRange(current))
+            v.setViewVisibility(R.id.dots, View.VISIBLE)
+            val filled = filledDots(current, s.now)
+            DOT_IDS.forEachIndexed { index, id ->
+                v.setColorStateList(id, "setImageTintList", if (index < filled) p.accent else p.dotOff)
+            }
+            v.setOnClickPendingIntent(R.id.now_block, eventIntent(context, current, 1))
+        } else {
+            v.setColorStateList(R.id.now_dot, "setImageTintList", p.dotOff)
+            v.setTextViewText(R.id.now_title, "Frei")
+            val timed = s.nextTimed
+            val freeUntil = if (timed != null && timed.firstDay(s.zone) == s.today) "bis ${clock(timed.begin)}" else "für heute"
+            v.setTextViewText(R.id.now_time, freeUntil)
+            v.setViewVisibility(R.id.dots, View.GONE)
+        }
+
+        // Block "Danach"
+        v.setViewVisibility(R.id.divider, View.VISIBLE)
+        v.setViewVisibility(R.id.next_block, View.VISIBLE)
+        val nextTimed = s.nextTimed
+        when {
+            s.allDayIsNext -> {
+                val first = s.nextAllDay.first()
+                v.setTextViewText(R.id.next_label, "DANACH · " + dayLabel(first.firstDay(s.zone), s.today))
+                v.setTextViewText(R.id.next_title, first.title)
+                v.setTextViewText(R.id.next_time, allDayDetails(s.nextAllDay, s.zone))
+                v.setViewVisibility(R.id.next_time, View.VISIBLE)
+                v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, first, 2))
+            }
+            nextTimed != null -> {
+                v.setTextViewText(R.id.next_label, "DANACH · " + relativeLabel(nextTimed.begin, s.now, s.zone))
+                v.setTextViewText(R.id.next_title, nextTimed.title)
+                v.setTextViewText(R.id.next_time, timeRange(nextTimed))
+                v.setViewVisibility(R.id.next_time, View.VISIBLE)
+                v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, nextTimed, 2))
+            }
+            else -> {
+                v.setTextViewText(R.id.next_label, "DANACH")
+                v.setTextViewText(R.id.next_title, "Nichts geplant")
+                v.setViewVisibility(R.id.next_time, View.GONE)
+            }
+        }
+        return v
+    }
+
+    // ---------- Texte ----------
+
+    private fun filledDots(event: CalEvent, now: Long): Int {
+        val duration = (event.end - event.begin).coerceAtLeast(1)
+        return ((now - event.begin) * DOT_IDS.size / duration).toInt().coerceIn(0, DOT_IDS.size)
+    }
+
+    private fun relativeLabel(begin: Long, now: Long, zone: ZoneId): String {
+        val minutes = ceil((begin - now) / MINUTE.toDouble()).toLong().coerceAtLeast(1)
+        if (minutes * MINUTE < COUNTDOWN_WINDOW) return "IN $minutes MIN"
+        val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
+        val day = Instant.ofEpochMilli(begin).atZone(zone).toLocalDate()
+        return if (day == today) "IN ${minutes / 60} STD" else dayLabel(day, today)
+    }
+
+    /** "MORGEN" oder z. B. "DO. 15.10." */
+    private fun dayLabel(day: LocalDate, today: LocalDate): String =
+        if (day == today.plusDays(1)) "MORGEN" else WEEKDAY_DATE.format(day).uppercase(Locale.GERMAN)
+
+    /** z. B. "ganztägig", "ganztägig · bis Fr." oder "ganztägig · +1" */
+    private fun allDayDetails(group: List<CalEvent>, zone: ZoneId): String {
+        val first = group.first()
+        val start = first.firstDay(zone)
+        val last = first.lastDay(zone)
+        return buildString {
+            append("ganztägig")
+            if (last.isAfter(start)) {
+                append(" · bis ")
+                append(if (ChronoUnit.DAYS.between(start, last) < 7) WEEKDAY.format(last) else DAY_MONTH.format(last))
+            }
+            if (group.size > 1) append(" · +${group.size - 1}")
+        }
+    }
+
+    private fun clock(time: Long): String =
+        Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()).format(TIME)
+
+    private fun timeRange(event: CalEvent): String = "${clock(event.begin)} – ${clock(event.end)}"
+
+    // ---------- Updates planen ----------
+
+    /**
+     * Nächster sinnvoller Zeitpunkt für ein Update: Terminbeginn/-ende, nächster
+     * Fortschrittspunkt, minütlicher Countdown kurz vor einem Termin, Mitternacht
+     * (dann wechseln die ganztägigen Termine) und spätestens alle 15 Minuten.
+     */
+    private fun nextRefreshTime(s: Snapshot): Long {
+        val now = s.now
+        var t = now + MAX_INTERVAL
+        s.current?.let { current ->
+            t = minOf(t, current.end)
+            val step = (current.end - current.begin) / DOT_IDS.size
+            if (step > 0) {
+                val k = (now - current.begin) / step + 1
+                t = minOf(t, current.begin + k * step)
+            }
+        }
+        s.nextTimed?.let { next ->
+            t = minOf(t, next.begin)
+            if (next.begin - now < COUNTDOWN_WINDOW) {
+                t = minOf(t, (now / MINUTE + 1) * MINUTE)
+            }
+        }
+        t = minOf(t, s.today.plusDays(1).atStartOfDay(s.zone).toInstant().toEpochMilli())
+        return maxOf(t, now + 20_000L) + 1_000L
+    }
+
+    private fun refreshIntent(context: Context): PendingIntent {
+        val intent = Intent(context, NowNextWidget::class.java).setAction(ACTION_REFRESH)
+        return PendingIntent.getBroadcast(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+    }
+
+    private fun scheduleRefresh(context: Context, at: Long) {
+        val alarms = context.getSystemService(AlarmManager::class.java) ?: return
+        // RTC ohne Wakeup: Bei ausgeschaltetem Display wird das Handy nicht geweckt.
+        // Verpasste Updates holt Android nach, sobald das Display wieder an ist.
+        alarms.set(AlarmManager.RTC, at, refreshIntent(context))
+    }
+
+    fun cancelRefresh(context: Context) {
+        context.getSystemService(AlarmManager::class.java)?.cancel(refreshIntent(context))
+    }
+
+    // ---------- Antippen ----------
+
+    private fun activityIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent =
+        PendingIntent.getActivity(
+            context, requestCode, intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
+    /** Öffnet die Kalender-App beim heutigen Tag. */
+    private fun calendarIntent(context: Context, now: Long): PendingIntent {
+        val zone = ZoneId.systemDefault()
+        val startOfToday = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
+            .atStartOfDay(zone).toInstant().toEpochMilli()
+        val uri = CalendarContract.CONTENT_URI.buildUpon()
+            .appendPath("time")
+            .appendPath(startOfToday.toString())
+            .build()
+        return activityIntent(context, 3, Intent(Intent.ACTION_VIEW, uri))
+    }
+
+    /** Öffnet den Termin in der Kalender-App. */
+    private fun eventIntent(context: Context, event: CalEvent, requestCode: Int): PendingIntent {
+        val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end)
+        if (event.allDay) intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true)
+        return activityIntent(context, requestCode, intent)
+    }
+
+    private fun settingsIntent(context: Context): PendingIntent =
+        activityIntent(context, 4, Intent(context, MainActivity::class.java))
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kalender-Widgets</string>
+    <string name="widget_now_next_name">Jetzt &amp; Danach</string>
+    <string name="widget_now_next_description">Uhr mit aktuellem und nächstem Termin</string>
+
+    <string name="permission_granted">Kalenderzugriff ist erlaubt. Das Widget zeigt Termine aus allen Kalendern, die auf diesem Handy synchronisiert und sichtbar sind.</string>
+    <string name="permission_missing">Kalenderzugriff fehlt noch. Ohne ihn kann das Widget keine Termine anzeigen.</string>
+    <string name="grant_permission">Kalenderzugriff erlauben</string>
+
+    <string name="setting_adaptive">Wallpaper-Farben</string>
+    <string name="setting_adaptive_hint">An: Das Widget übernimmt die Farbpalette deines Hintergrundbilds. Aus: klassisches Schwarz mit rotem Akzent.</string>
+    <string name="setting_glass">Transparenz</string>
+    <string name="setting_glass_hint">Halbtransparenter Hintergrund mit feiner Kante. Einen echten Milchglas-Blur kann dieses Widget nicht erzeugen.</string>
+
+    <string name="how_to_add">Widget hinzufügen: Homescreen gedrückt halten, „Widgets“ wählen, dann „Kalender-Widgets“ und „Jetzt &amp; Danach“ auf den Homescreen ziehen.</string>
+    <string name="refresh_now">Widget jetzt aktualisieren</string>
+    <string name="refreshed">Aktualisiert</string>
+</resources>
