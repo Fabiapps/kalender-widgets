@@ -218,6 +218,13 @@ object WidgetUpdater {
         }
         v.setColorStateList(R.id.allday_ring, "setImageTintList", p.muted)
         v.setColorStateList(R.id.divider, "setImageTintList", p.line)
+        // Uhr-Kacheln: leicht abgesetzter Ton, Trennfuge in Hintergrundfarbe
+        for (id in intArrayOf(R.id.clock_hour_tile, R.id.clock_minute_tile)) {
+            v.setColorStateList(id, "setImageTintList", p.dotOff)
+        }
+        for (id in intArrayOf(R.id.clock_hour_split, R.id.clock_minute_split)) {
+            v.setColorStateList(id, "setImageTintList", p.background)
+        }
 
         v.setOnClickPendingIntent(android.R.id.background, calendarIntent(context, s.now, base + 3))
 

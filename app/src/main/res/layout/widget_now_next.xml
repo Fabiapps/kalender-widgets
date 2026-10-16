@@ -39,40 +39,95 @@
             android:minWidth="96dp"
             android:orientation="vertical">
 
-            <!-- Stunde und Minute in gemeinsamer Spalte; Monospace-Schrift, weil tnum nicht
-                 von jeder Systemschrift unterstützt wird und die Ziffern sonst versetzt stehen -->
+            <!-- Stunde und Minute als Kacheln im Stil einer Klapptafel (Flughafenanzeige).
+                 Monospace-Schrift, weil tnum nicht von jeder Systemschrift unterstützt wird
+                 und die Ziffern sonst versetzt stehen. -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="end"
                 android:orientation="vertical">
 
-                <TextClock
-                    android:id="@+id/clock_hour"
+                <FrameLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:fontFeatureSettings="tnum"
-                    android:format12Hour="HH"
-                    android:format24Hour="HH"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.04"
-                    android:textColor="@color/mono_text"
-                    android:textSize="56sp" />
+                    android:layout_height="wrap_content">
 
-                <TextClock
-                    android:id="@+id/clock_minute"
+                    <ImageView
+                        android:id="@+id/clock_hour_tile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/flap_tile"
+                        android:tint="@color/mono_dot_off_solid" />
+
+                    <TextClock
+                        android:id="@+id/clock_hour"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:fontFeatureSettings="tnum"
+                        android:format12Hour="HH"
+                        android:format24Hour="HH"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.04"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp"
+                        android:textColor="@color/mono_text"
+                        android:textSize="56sp" />
+
+                    <!-- Trennfuge in der Mitte, Farbe = Widget-Hintergrund -->
+                    <ImageView
+                        android:id="@+id/clock_hour_split"
+                        android:layout_width="match_parent"
+                        android:layout_height="1.5dp"
+                        android:layout_gravity="center_vertical"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/line"
+                        android:tint="@color/mono_bg_solid" />
+                </FrameLayout>
+
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="-2dp"
-                    android:fontFamily="monospace"
-                    android:fontFeatureSettings="tnum"
-                    android:format12Hour="mm"
-                    android:format24Hour="mm"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.04"
-                    android:textColor="@color/mono_text"
-                    android:textSize="56sp" />
+                    android:layout_marginTop="4dp">
+
+                    <ImageView
+                        android:id="@+id/clock_minute_tile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/flap_tile"
+                        android:tint="@color/mono_dot_off_solid" />
+
+                    <TextClock
+                        android:id="@+id/clock_minute"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:fontFeatureSettings="tnum"
+                        android:format12Hour="mm"
+                        android:format24Hour="mm"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.04"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp"
+                        android:textColor="@color/mono_text"
+                        android:textSize="56sp" />
+
+                    <!-- Trennfuge in der Mitte, Farbe = Widget-Hintergrund -->
+                    <ImageView
+                        android:id="@+id/clock_minute_split"
+                        android:layout_width="match_parent"
+                        android:layout_height="1.5dp"
+                        android:layout_gravity="center_vertical"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/line"
+                        android:tint="@color/mono_bg_solid" />
+                </FrameLayout>
             </LinearLayout>
 
             <FrameLayout
