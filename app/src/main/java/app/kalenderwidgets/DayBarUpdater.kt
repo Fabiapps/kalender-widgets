@@ -15,7 +15,7 @@ import java.time.ZoneId
 /** Baut Widget B (Tagesleiste) zusammen. */
 object DayBarUpdater {
 
-    fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
+    internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
         val glass = WidgetPrefs.widgetGlass(context, widgetId)
         val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 100 + 50
