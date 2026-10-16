@@ -197,12 +197,16 @@
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <View
+            <ImageView
+                android:id="@+id/db_footer_divider"
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:background="@color/mono_line_solid" />
+                android:importantForAccessibility="no"
+                android:scaleType="fitXY"
+                android:src="@drawable/line"
+                android:tint="@color/mono_line_solid" />
 
             <!-- Rechts: nächster Termin -->
             <LinearLayout

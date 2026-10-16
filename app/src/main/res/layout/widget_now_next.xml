@@ -139,32 +139,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/now_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/now_dot"
-                        android:layout_width="7dp"
-                        android:layout_height="7dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/dot"
-                        android:tint="@color/mono_accent" />
-
-                    <TextView
-                        android:id="@+id/now_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="7dp"
-                        android:fontFamily="monospace"
-                        android:letterSpacing="0.08"
-                        android:maxLines="1"
-                        android:text="JETZT"
-                        android:textColor="@color/mono_muted_solid"
-                        android:textSize="10sp" />
-                </LinearLayout>
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.08"
+                    android:maxLines="1"
+                    android:text="JETZT"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="10sp" />
 
                 <TextView
                     android:id="@+id/now_title"
@@ -342,7 +326,7 @@
                     android:fontFamily="monospace"
                     android:letterSpacing="0.08"
                     android:maxLines="1"
-                    android:text="DANACH · IN 28 MIN"
+                    android:text="IN 28 MIN"
                     android:textColor="@color/mono_muted_solid"
                     android:textSize="10sp" />
 

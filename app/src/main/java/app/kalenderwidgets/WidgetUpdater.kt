@@ -223,7 +223,6 @@ object WidgetUpdater {
 
         if (!s.hasPermission) {
             v.setViewVisibility(R.id.allday_row, View.GONE)
-            v.setColorStateList(R.id.now_dot, "setImageTintList", p.dotOff)
             v.setTextViewText(R.id.now_label, "KALENDER")
             v.setTextViewText(R.id.now_title, "Zugriff fehlt")
             v.setTextViewText(R.id.now_time, "Tippen zum Einrichten")
@@ -253,7 +252,6 @@ object WidgetUpdater {
         v.setTextViewText(R.id.now_label, "JETZT")
         val current = s.current
         if (current != null) {
-            v.setColorStateList(R.id.now_dot, "setImageTintList", p.accent)
             v.setTextViewText(R.id.now_title, current.title)
             v.setTextViewText(R.id.now_time, timeRange(current))
             v.setViewVisibility(R.id.dots, View.VISIBLE)
@@ -263,7 +261,6 @@ object WidgetUpdater {
             }
             v.setOnClickPendingIntent(R.id.now_block, eventIntent(context, current, base + 1))
         } else {
-            v.setColorStateList(R.id.now_dot, "setImageTintList", p.dotOff)
             v.setTextViewText(R.id.now_title, "Frei")
             val timed = s.nextTimed
             val freeUntil = if (timed != null && timed.firstDay(s.zone) == s.today) "bis ${clock(timed.begin)}" else "für heute"
@@ -277,21 +274,23 @@ object WidgetUpdater {
         when {
             s.allDayIsNext -> {
                 val first = s.nextAllDay.first()
-                v.setTextViewText(R.id.next_label, "DANACH · " + dayLabel(first.firstDay(s.zone), s.today))
+                v.setViewVisibility(R.id.next_label, View.VISIBLE)
+                v.setTextViewText(R.id.next_label, dayLabel(first.firstDay(s.zone), s.today))
                 v.setTextViewText(R.id.next_title, first.title)
                 v.setTextViewText(R.id.next_time, allDayDetails(s.nextAllDay, s.zone))
                 v.setViewVisibility(R.id.next_time, View.VISIBLE)
                 v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, first, base + 2))
             }
             nextTimed != null -> {
-                v.setTextViewText(R.id.next_label, "DANACH · " + relativeLabel(nextTimed.begin, s.now, s.zone))
+                v.setViewVisibility(R.id.next_label, View.VISIBLE)
+                v.setTextViewText(R.id.next_label, relativeLabel(nextTimed.begin, s.now, s.zone))
                 v.setTextViewText(R.id.next_title, nextTimed.title)
                 v.setTextViewText(R.id.next_time, timeRange(nextTimed))
                 v.setViewVisibility(R.id.next_time, View.VISIBLE)
                 v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, nextTimed, base + 2))
             }
             else -> {
-                v.setTextViewText(R.id.next_label, "DANACH")
+                v.setViewVisibility(R.id.next_label, View.GONE)
                 v.setTextViewText(R.id.next_title, "Nichts geplant")
                 v.setViewVisibility(R.id.next_time, View.GONE)
             }

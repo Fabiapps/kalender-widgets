@@ -34,6 +34,7 @@ object DayBarUpdater {
             v.setColorStateList(id, "setTextColor", p.muted)
         }
         v.setColorStateList(R.id.db_allday_ring, "setImageTintList", p.muted)
+        v.setColorStateList(R.id.db_footer_divider, "setImageTintList", p.line)
 
         v.setOnClickPendingIntent(android.R.id.background, WidgetUpdater.calendarIntent(context, s.now, base + 3))
 

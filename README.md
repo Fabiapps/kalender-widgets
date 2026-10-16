@@ -75,7 +75,7 @@ base64 -w0 release.jks > release.b64
 
 - **Oben rechts:** ganztägige Termine heute (hohler Ring, bei mehreren „+N").
 - **Jetzt:** laufender Termin mit Uhrzeit und Fortschrittspunkten; ohne Termin „Frei – bis …".
-- **Danach:** nächster Termin mit Zeitstempel oder ganztägiger Termin.
+- **Danach:** Label zeigt nur den Zeitpunkt: „IN 28 MIN", „IN 2 STD", „MORGEN" oder das Datum. Bei ganztägigem Termin entsprechend. Kein nächstes Ereignis: Label ausgeblendet, nur „Nichts geplant".
 
 ### Tagesleiste
 
