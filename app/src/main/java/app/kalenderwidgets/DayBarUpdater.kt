@@ -19,43 +19,35 @@ object DayBarUpdater {
         val glass = WidgetPrefs.widgetGlass(context, widgetId)
         val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 100 + 50
+        val timeline = if (s.hasPermission) drawTimeline(context, s, options, p)
+                       else emptyTimelineBitmap(context, options, p)
 
-        fun makeBase(layoutId: Int): RemoteViews {
-            val v = RemoteViews(context.packageName, layoutId)
+        fun applyAll(v: RemoteViews) {
+            // Hintergrund
             v.setColorStateList(R.id.db_bg_fill, "setImageTintList", p.background)
             v.setViewVisibility(R.id.db_bg_stroke, if (glass) View.VISIBLE else View.GONE)
-            for (id in intArrayOf(R.id.db_clock, R.id.db_allday_title)) {
+            // Farben – alle Views upfront, vor jedem möglichen frühzeitigen Return
+            for (id in intArrayOf(R.id.db_clock, R.id.db_allday_title, R.id.db_current_title, R.id.db_next_title)) {
                 v.setColorStateList(id, "setTextColor", p.text)
             }
-            for (id in intArrayOf(R.id.db_weekday, R.id.db_date, R.id.db_allday_count)) {
+            for (id in intArrayOf(R.id.db_weekday, R.id.db_date, R.id.db_allday_count, R.id.db_current_label, R.id.db_next_label)) {
                 v.setColorStateList(id, "setTextColor", p.muted)
             }
             v.setColorStateList(R.id.db_allday_ring, "setImageTintList", p.muted)
             v.setOnClickPendingIntent(android.R.id.background, WidgetUpdater.calendarIntent(context, s.now, base + 3))
-            return v
-        }
+            v.setImageViewBitmap(R.id.db_timeline, timeline)
 
-        if (!s.hasPermission) {
-            val v = makeBase(R.layout.widget_day_bar)
-            for (id in intArrayOf(R.id.db_current_title, R.id.db_next_title)) {
-                v.setColorStateList(id, "setTextColor", p.text)
+            if (!s.hasPermission) {
+                v.setViewVisibility(R.id.db_allday_row, View.GONE)
+                v.setTextViewText(R.id.db_current_label, "KALENDER")
+                v.setTextViewText(R.id.db_current_title, "Zugriff fehlt")
+                v.setTextViewText(R.id.db_next_label, "")
+                v.setTextViewText(R.id.db_next_title, "Tippen zum Einrichten")
+                v.setOnClickPendingIntent(android.R.id.background, WidgetUpdater.settingsIntent(context, base + 4))
+                return
             }
-            for (id in intArrayOf(R.id.db_current_label, R.id.db_next_label)) {
-                v.setColorStateList(id, "setTextColor", p.muted)
-            }
-            v.setViewVisibility(R.id.db_allday_row, View.GONE)
-            v.setTextViewText(R.id.db_current_label, "KALENDER")
-            v.setTextViewText(R.id.db_current_title, "Zugriff fehlt")
-            v.setTextViewText(R.id.db_next_label, "")
-            v.setTextViewText(R.id.db_next_title, "Tippen zum Einrichten")
-            v.setOnClickPendingIntent(android.R.id.background, WidgetUpdater.settingsIntent(context, base + 4))
-            v.setImageViewBitmap(R.id.db_timeline, emptyTimelineBitmap(context, options, p))
-            return v
-        }
 
-        val timeline = drawTimeline(context, s, options, p)
-
-        fun applyCommon(v: RemoteViews) {
+            // Ganztägige Termine
             val firstAllDay = s.allDayToday.firstOrNull()
             if (firstAllDay != null) {
                 v.setViewVisibility(R.id.db_allday_row, View.VISIBLE)
@@ -71,48 +63,43 @@ object DayBarUpdater {
             } else {
                 v.setViewVisibility(R.id.db_allday_row, View.GONE)
             }
-            v.setImageViewBitmap(R.id.db_timeline, timeline)
-        }
 
-        val vC = makeBase(R.layout.widget_day_bar_compact)
-        applyCommon(vC)
-
-        val vF = makeBase(R.layout.widget_day_bar)
-        applyCommon(vF)
-        for (id in intArrayOf(R.id.db_current_title, R.id.db_next_title)) {
-            vF.setColorStateList(id, "setTextColor", p.text)
-        }
-        for (id in intArrayOf(R.id.db_current_label, R.id.db_next_label)) {
-            vF.setColorStateList(id, "setTextColor", p.muted)
-        }
-
-        val current = s.current
-        if (current != null) {
-            vF.setTextViewText(R.id.db_current_label, "BIS ${WidgetUpdater.clock(current.end)}")
-            vF.setTextViewText(R.id.db_current_title, current.title)
-            vF.setOnClickPendingIntent(R.id.db_footer_left, WidgetUpdater.eventIntent(context, current, base + 1))
-        } else {
-            vF.setTextViewText(R.id.db_current_label, "JETZT")
-            vF.setTextViewText(R.id.db_current_title, "Frei")
-        }
-
-        when {
-            s.allDayIsNext -> {
-                val first = s.nextAllDay.first()
-                vF.setTextViewText(R.id.db_next_label, WidgetUpdater.dayLabel(first.firstDay(s.zone), s.today))
-                vF.setTextViewText(R.id.db_next_title, first.title)
-                vF.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, first, base + 2))
+            // Fußzeile links: laufender Termin
+            val current = s.current
+            if (current != null) {
+                v.setTextViewText(R.id.db_current_label, "BIS ${WidgetUpdater.clock(current.end)}")
+                v.setTextViewText(R.id.db_current_title, current.title)
+                v.setOnClickPendingIntent(R.id.db_footer_left, WidgetUpdater.eventIntent(context, current, base + 1))
+            } else {
+                v.setTextViewText(R.id.db_current_label, "JETZT")
+                v.setTextViewText(R.id.db_current_title, "Frei")
             }
-            s.nextTimed != null -> {
-                vF.setTextViewText(R.id.db_next_label, "AB ${WidgetUpdater.clock(s.nextTimed.begin)}")
-                vF.setTextViewText(R.id.db_next_title, s.nextTimed.title)
-                vF.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, s.nextTimed, base + 2))
-            }
-            else -> {
-                vF.setTextViewText(R.id.db_next_label, "AB")
-                vF.setTextViewText(R.id.db_next_title, "Nichts mehr heute")
+
+            // Fußzeile rechts: nächster Termin
+            when {
+                s.allDayIsNext -> {
+                    val first = s.nextAllDay.first()
+                    v.setTextViewText(R.id.db_next_label, WidgetUpdater.dayLabel(first.firstDay(s.zone), s.today))
+                    v.setTextViewText(R.id.db_next_title, first.title)
+                    v.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, first, base + 2))
+                }
+                s.nextTimed != null -> {
+                    v.setTextViewText(R.id.db_next_label, "AB ${WidgetUpdater.clock(s.nextTimed.begin)}")
+                    v.setTextViewText(R.id.db_next_title, s.nextTimed.title)
+                    v.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, s.nextTimed, base + 2))
+                }
+                else -> {
+                    v.setTextViewText(R.id.db_next_label, "AB")
+                    v.setTextViewText(R.id.db_next_title, "Nichts mehr heute")
+                }
             }
         }
+
+        val vC = RemoteViews(context.packageName, R.layout.widget_day_bar_compact)
+        applyAll(vC)
+
+        val vF = RemoteViews(context.packageName, R.layout.widget_day_bar)
+        applyAll(vF)
 
         return RemoteViews(mapOf(
             SizeF(100f, 50f) to vC,
@@ -133,11 +120,11 @@ object DayBarUpdater {
         val density = context.resources.displayMetrics.density
         val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 250).coerceAtLeast(200)
         val widthPx = (widthDp * density).toInt()
-        val heightPx = (56 * density).toInt().coerceAtLeast(1)
+        val heightPx = (28 * density).toInt().coerceAtLeast(1)
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
-        canvas.drawLine(0f, 10 * density, widthPx.toFloat(), 10 * density, linePaint)
+        canvas.drawLine(0f, 9 * density, widthPx.toFloat(), 9 * density, linePaint)
         return bmp
     }
 
@@ -161,7 +148,7 @@ object DayBarUpdater {
         endHour = minOf(endHour, 24)
         endHour = maxOf(endHour, startHour + 4)
 
-        val heightPx = (32 * density).toInt().coerceAtLeast(1)
+        val heightPx = (28 * density).toInt().coerceAtLeast(1)
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
 
@@ -170,9 +157,9 @@ object DayBarUpdater {
         val accentColor = context.getColor(p.accent)
         val lineColor = context.getColor(p.line)
 
-        val lineY = 10 * density
+        val lineY = 9 * density
         val barH = 6 * density
-        val labelY = 26 * density
+        val labelY = 23 * density
         val totalMin = (endHour - startHour) * 60f
 
         // Basislinie
