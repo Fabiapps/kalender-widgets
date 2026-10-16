@@ -39,30 +39,41 @@
             android:minWidth="96dp"
             android:orientation="vertical">
 
-            <TextClock
-                android:id="@+id/clock_hour"
+            <!-- Stunde und Minute rechtsbündig in gemeinsamer Spalte, damit die Ziffern
+                 auch ohne tnum-Unterstützung der Schrift an der rechten Kante fluchten -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-light"
-                android:format12Hour="HH"
-                android:format24Hour="HH"
-                android:includeFontPadding="false"
-                android:letterSpacing="-0.04"
-                android:textColor="@color/mono_text"
-                android:textSize="56sp" />
+                android:gravity="end"
+                android:orientation="vertical">
 
-            <TextClock
-                android:id="@+id/clock_minute"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-2dp"
-                android:fontFamily="sans-serif-light"
-                android:format12Hour="mm"
-                android:format24Hour="mm"
-                android:includeFontPadding="false"
-                android:letterSpacing="-0.04"
-                android:textColor="@color/mono_text"
-                android:textSize="56sp" />
+                <TextClock
+                    android:id="@+id/clock_hour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:fontFeatureSettings="tnum"
+                    android:format12Hour="HH"
+                    android:format24Hour="HH"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.04"
+                    android:textColor="@color/mono_text"
+                    android:textSize="56sp" />
+
+                <TextClock
+                    android:id="@+id/clock_minute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-2dp"
+                    android:fontFamily="sans-serif-light"
+                    android:fontFeatureSettings="tnum"
+                    android:format12Hour="mm"
+                    android:format24Hour="mm"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.04"
+                    android:textColor="@color/mono_text"
+                    android:textSize="56sp" />
+            </LinearLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
