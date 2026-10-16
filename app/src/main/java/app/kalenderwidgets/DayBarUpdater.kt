@@ -93,9 +93,7 @@ object DayBarUpdater {
             vF.setOnClickPendingIntent(R.id.db_footer_left, WidgetUpdater.eventIntent(context, current, base + 1))
         } else {
             vF.setTextViewText(R.id.db_current_label, "JETZT")
-            val freeUntil = if (s.nextTimed != null && s.nextTimed.firstDay(s.zone) == s.today)
-                "bis ${WidgetUpdater.clock(s.nextTimed.begin)}" else "für heute"
-            vF.setTextViewText(R.id.db_current_title, "Frei · $freeUntil")
+            vF.setTextViewText(R.id.db_current_title, "Frei")
         }
 
         when {
@@ -118,7 +116,7 @@ object DayBarUpdater {
 
         return RemoteViews(mapOf(
             SizeF(100f, 50f) to vC,
-            SizeF(100f, 140f) to vF,
+            SizeF(100f, 180f) to vF,
         ))
     }
 
@@ -139,7 +137,7 @@ object DayBarUpdater {
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
-        canvas.drawLine(0f, 20 * density, widthPx.toFloat(), 20 * density, linePaint)
+        canvas.drawLine(0f, 10 * density, widthPx.toFloat(), 10 * density, linePaint)
         return bmp
     }
 
@@ -163,7 +161,7 @@ object DayBarUpdater {
         endHour = minOf(endHour, 24)
         endHour = maxOf(endHour, startHour + 4)
 
-        val heightPx = (56 * density).toInt().coerceAtLeast(1)
+        val heightPx = (32 * density).toInt().coerceAtLeast(1)
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
 
@@ -172,9 +170,9 @@ object DayBarUpdater {
         val accentColor = context.getColor(p.accent)
         val lineColor = context.getColor(p.line)
 
-        val lineY = 22 * density
+        val lineY = 10 * density
         val barH = 6 * density
-        val labelY = 48 * density
+        val labelY = 26 * density
         val totalMin = (endHour - startHour) * 60f
 
         // Basislinie

@@ -130,19 +130,20 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Spacer: Zeitleiste an den unteren Rand schieben -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
         <!-- Zeitleiste (Canvas-Bitmap) -->
         <ImageView
             android:id="@+id/db_timeline"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="6dp"
             android:importantForAccessibility="no"
             android:scaleType="fitXY" />
+
+        <!-- Spacer: bei größeren Widgets Leerraum nach unten schieben -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
     </LinearLayout>
 </FrameLayout>

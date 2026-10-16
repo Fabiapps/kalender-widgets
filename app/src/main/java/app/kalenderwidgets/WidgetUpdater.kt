@@ -254,6 +254,7 @@ object WidgetUpdater {
         if (current != null) {
             v.setTextViewText(R.id.now_title, current.title)
             v.setTextViewText(R.id.now_time, timeRange(current))
+            v.setViewVisibility(R.id.now_time, View.VISIBLE)
             v.setViewVisibility(R.id.dots, View.VISIBLE)
             val filled = filledDots(current, s.now)
             DOT_IDS.forEachIndexed { index, id ->
@@ -262,9 +263,7 @@ object WidgetUpdater {
             v.setOnClickPendingIntent(R.id.now_block, eventIntent(context, current, base + 1))
         } else {
             v.setTextViewText(R.id.now_title, "Frei")
-            val timed = s.nextTimed
-            val freeUntil = if (timed != null && timed.firstDay(s.zone) == s.today) "bis ${clock(timed.begin)}" else "für heute"
-            v.setTextViewText(R.id.now_time, freeUntil)
+            v.setViewVisibility(R.id.now_time, View.GONE)
             v.setViewVisibility(R.id.dots, View.GONE)
         }
 
