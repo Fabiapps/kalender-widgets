@@ -157,6 +157,7 @@ object DayBarUpdater {
         val textColor = context.getColor(p.text)
         val muteColor = context.getColor(p.muted)
         val accentColor = context.getColor(p.accent)
+        val currentColor = context.getColor(R.color.nothing_yellow)
         val lineColor = context.getColor(p.line)
 
         val lineY = 9 * density
@@ -181,7 +182,7 @@ object DayBarUpdater {
             val x2 = timeToX(event.end).coerceAtLeast(x1 + 3 * density)
             barPaint.color = when {
                 event.end <= s.now -> muteColor
-                event.begin <= s.now && s.now < event.end -> accentColor
+                event.begin <= s.now && s.now < event.end -> currentColor
                 else -> textColor
             }
             canvas.drawRoundRect(x1, lineY - barH / 2f, x2, lineY + barH / 2f, 2 * density, 2 * density, barPaint)
