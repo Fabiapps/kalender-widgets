@@ -134,10 +134,12 @@ object DayBarUpdater {
         val zone = s.zone
         val timedToday = s.allEvents.filter { !it.allDay && it.firstDay(zone) == s.today }
 
-        // Zeitraum: Standard 08–20, immer aktuelle Uhrzeit enthalten, auf heutige Termine erweitern
+        // Zeitraum: Standard 08–20, immer mindestens 4 Stunden ab jetzt (aufgerundet auf die volle
+        // Stunde), auf heutige Termine erweitern
         val nowZdt = Instant.ofEpochMilli(s.now).atZone(zone)
+        val pastFullHour = nowZdt.minute > 0 || nowZdt.second > 0
         var startHour = minOf(8, nowZdt.hour)
-        var endHour = maxOf(20, nowZdt.hour + 1)
+        var endHour = maxOf(20, nowZdt.hour + 4 + (if (pastFullHour) 1 else 0))
         timedToday.forEach { event ->
             val bZdt = Instant.ofEpochMilli(event.begin).atZone(zone)
             val eZdt = Instant.ofEpochMilli(event.end).atZone(zone)
