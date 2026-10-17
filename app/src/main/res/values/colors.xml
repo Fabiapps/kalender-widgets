@@ -20,6 +20,9 @@
 
     <color name="icon_background">#FF0A0A0A</color>
 
+    <!-- Nothing-Gelb (aus Nothing-UI gemessen): laufender Termin in der Zeitleiste von Widget B -->
+    <color name="nothing_yellow">#FFFFC700</color>
+
     <!-- Hell, klassisch -->
     <color name="light_bg_solid">#FFF4F4F2</color>
     <color name="light_bg_glass">#A8FFFFFF</color>
