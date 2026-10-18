@@ -161,7 +161,8 @@
             android:importantForAccessibility="no"
             android:scaleType="fitXY" />
 
-        <!-- Fußzeile: zwei Spalten -->
+        <!-- Fußzeile: laufender Termin links; nächster Termin unter seinem Balken in der
+             Zeitleiste. Breiten und Abstand setzt DayBarUpdater.layoutFooter() per Code. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -171,15 +172,15 @@
             <!-- Links: laufender Termin -->
             <LinearLayout
                 android:id="@+id/db_footer_left"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/db_current_label"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
                     android:fontFamily="monospace"
                     android:letterSpacing="0.06"
                     android:maxLines="1"
@@ -202,9 +203,8 @@
             <!-- Rechts: nächster Termin -->
             <LinearLayout
                 android:id="@+id/db_footer_right"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginStart="16dp"
                 android:orientation="vertical">
 
