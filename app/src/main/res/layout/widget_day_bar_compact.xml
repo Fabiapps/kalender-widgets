@@ -32,7 +32,7 @@
         android:paddingEnd="16dp"
         android:paddingBottom="12dp">
 
-        <!-- Kopfzeile: Uhrzeit, Kapsel (ganztägig) und Datum auf einer Grundlinie; Wochentag über dem Datum -->
+        <!-- Kopfzeile: Uhrzeit und Datum auf einer Grundlinie; Wochentag über dem Datum -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,59 +52,10 @@
                 android:textColor="@color/mono_text"
                 android:textSize="40sp" />
 
-            <!-- Freier Platz zwischen Uhr und Datum; Kapsel (ganztägige Termine) rechtsbündig darin.
-                 baselineAlignedChildIndex: Grundlinie der Kapsel = Grundlinie der Uhrzeit -->
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:baselineAlignedChildIndex="0"
-                android:gravity="end"
-                android:orientation="horizontal">
-
-                <!-- Kapsel; Hintergrundfarbe kommt per setBackgroundTintList.
-                     Vertikales Padding an den Texten, damit es in die Grundlinie eingeht. -->
-                <LinearLayout
-                    android:id="@+id/db_allday_row"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/capsule"
-                    android:backgroundTint="@color/mono_line_solid"
-                    android:baselineAlignedChildIndex="0"
-                    android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:visibility="gone">
-
-                    <!-- Titel kürzt sich zuerst (weight), „· bis …“ bleibt sichtbar -->
-                    <TextView
-                        android:id="@+id/db_allday_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:paddingTop="2dp"
-                        android:paddingBottom="2dp"
-                        android:text="Feiertag"
-                        android:textColor="@color/mono_text"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/db_allday_detail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:paddingTop="2dp"
-                        android:paddingBottom="2dp"
-                        android:text=" · bis So."
-                        android:textColor="@color/mono_muted_solid"
-                        android:textSize="11sp"
-                        android:visibility="gone" />
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_weight="1" />
 
             <!-- Wochentag über dem Datum, zusammen etwa so hoch wie die Uhrziffern;
                  die Grundlinie des Datums (Kind 1) fluchtet mit der Uhrzeit -->
@@ -140,6 +91,51 @@
                     android:textAllCaps="true"
                     android:textColor="@color/mono_muted_solid"
                     android:textSize="16sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Ganztägige Termine: Kapsel über die volle Breite, Text zentriert,
+             flacher als in der großen Variante (18dp).
+             Hintergrundfarbe kommt per setBackgroundTintList. -->
+        <LinearLayout
+            android:id="@+id/db_allday_row"
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/capsule"
+            android:backgroundTint="@color/mono_line_solid"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:visibility="gone">
+
+            <!-- Titel kürzt sich zuerst (weight), „· bis …“ bleibt sichtbar -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/db_allday_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Feiertag"
+                    android:textColor="@color/mono_text"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/db_allday_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text=" · bis So."
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 
