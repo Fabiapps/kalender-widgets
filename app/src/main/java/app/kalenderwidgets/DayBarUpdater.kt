@@ -39,10 +39,10 @@ object DayBarUpdater {
             for (id in intArrayOf(R.id.db_clock, R.id.db_allday_title, R.id.db_current_title, R.id.db_next_title)) {
                 v.setColorStateList(id, "setTextColor", p.text)
             }
-            for (id in intArrayOf(R.id.db_weekday, R.id.db_date, R.id.db_allday_count, R.id.db_current_label, R.id.db_next_label)) {
+            for (id in intArrayOf(R.id.db_weekday, R.id.db_date, R.id.db_allday_detail, R.id.db_current_label, R.id.db_next_label)) {
                 v.setColorStateList(id, "setTextColor", p.muted)
             }
-            v.setColorStateList(R.id.db_allday_ring, "setImageTintList", p.muted)
+            v.setColorStateList(R.id.db_allday_bg, "setImageTintList", p.line)
             v.setOnClickPendingIntent(android.R.id.background, WidgetUpdater.calendarIntent(context, s.now, base + 3))
             v.setImageViewBitmap(R.id.db_timeline, timeline)
 
@@ -61,13 +61,9 @@ object DayBarUpdater {
             if (firstAllDay != null) {
                 v.setViewVisibility(R.id.db_allday_row, View.VISIBLE)
                 v.setTextViewText(R.id.db_allday_title, firstAllDay.title)
-                val more = s.allDayToday.size - 1
-                if (more > 0) {
-                    v.setTextViewText(R.id.db_allday_count, "+$more")
-                    v.setViewVisibility(R.id.db_allday_count, View.VISIBLE)
-                } else {
-                    v.setViewVisibility(R.id.db_allday_count, View.GONE)
-                }
+                val detail = allDayDetail(s.allDayToday, s)
+                v.setTextViewText(R.id.db_allday_detail, detail)
+                v.setViewVisibility(R.id.db_allday_detail, if (detail.isEmpty()) View.GONE else View.VISIBLE)
                 v.setOnClickPendingIntent(R.id.db_allday_row, WidgetUpdater.eventIntent(context, firstAllDay, base + 5))
             } else {
                 v.setViewVisibility(R.id.db_allday_row, View.GONE)
@@ -135,6 +131,21 @@ object DayBarUpdater {
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
         canvas.drawLine(0f, 9 * density, widthPx.toFloat(), 9 * density, linePaint)
         return bmp
+    }
+
+    /** Zusatz in der Kapsel: „ · bis So.“ (mehrtägig, < 7 Tage), „ · bis 02.11.“, „ · +1“ (weitere). */
+    private fun allDayDetail(today: List<CalEvent>, s: Snapshot): String {
+        val last = today.first().lastDay(s.zone)
+        return buildString {
+            if (last.isAfter(s.today)) {
+                append(" · bis ")
+                append(
+                    if (ChronoUnit.DAYS.between(s.today, last) < 7) WidgetUpdater.WEEKDAY.format(last)
+                    else WidgetUpdater.DAY_MONTH.format(last)
+                )
+            }
+            if (today.size > 1) append(" · +${today.size - 1}")
+        }
     }
 
     /** „AB 18:00“ heute, „MORGEN AB 18:00“, innerhalb einer Woche „MO. AB 18:00“, sonst mit Datum. */
