@@ -100,13 +100,19 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Abstand über der Kapsel; wird mit ihr ein-/ausgeblendet -->
+        <FrameLayout
+            android:id="@+id/db_allday_gap"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:visibility="gone" />
+
         <!-- Ganztägige Termine: Kapsel über die volle Breite, Text zentriert.
              Hintergrundfarbe kommt per setBackgroundTintList. -->
         <LinearLayout
             android:id="@+id/db_allday_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:background="@drawable/capsule"
             android:backgroundTint="@color/mono_line_solid"
             android:gravity="center"

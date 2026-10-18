@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Widget B Kompakt (4×2): Inhalt oben, Footer sichtbar, ≥12dp Abstand unten. -->
+<!-- Widget B Kompakt (4×2): Elemente gleichmäßig über die Höhe verteilt, mind. 8dp Rand oben und unten. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
@@ -30,7 +30,15 @@
         android:paddingStart="16dp"
         android:paddingTop="8dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="12dp">
+        android:paddingBottom="8dp">
+
+        <!-- Gleich große, dehnbare Zwischenräume oben, zwischen den Elementen und unten:
+             bei viel Platz rücken die Elemente gleichmäßig auseinander, bei wenig Platz
+             schrumpfen nur die Zwischenräume und nichts wird abgeschnitten. -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- Kopfzeile: Uhrzeit und Datum auf einer Grundlinie; Wochentag über dem Datum -->
         <LinearLayout
@@ -94,6 +102,13 @@
             </LinearLayout>
         </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/db_allday_gap"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
         <!-- Ganztägige Termine: Kapsel über die volle Breite, Text zentriert,
              flacher als in der großen Variante (18dp).
              Hintergrundfarbe kommt per setBackgroundTintList. -->
@@ -101,7 +116,6 @@
             android:id="@+id/db_allday_row"
             android:layout_width="match_parent"
             android:layout_height="18dp"
-            android:layout_marginTop="6dp"
             android:background="@drawable/capsule"
             android:backgroundTint="@color/mono_line_solid"
             android:gravity="center"
@@ -139,20 +153,28 @@
             </LinearLayout>
         </LinearLayout>
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <!-- Zeitleiste (Canvas-Bitmap) -->
         <ImageView
             android:id="@+id/db_timeline"
             android:layout_width="match_parent"
             android:layout_height="34dp"
-            android:layout_marginTop="4dp"
             android:importantForAccessibility="no"
             android:scaleType="fitXY" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <!-- Fußzeile: zwei Spalten -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:orientation="horizontal">
 
             <!-- Links: laufender Termin -->
@@ -220,5 +242,9 @@
             </LinearLayout>
         </LinearLayout>
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 </FrameLayout>

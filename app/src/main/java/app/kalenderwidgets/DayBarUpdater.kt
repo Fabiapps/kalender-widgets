@@ -47,7 +47,7 @@ object DayBarUpdater {
             v.setImageViewBitmap(R.id.db_timeline, timeline)
 
             if (!s.hasPermission) {
-                v.setViewVisibility(R.id.db_allday_row, View.GONE)
+                setAllDayVisible(v, View.GONE)
                 v.setTextViewText(R.id.db_current_label, "KALENDER")
                 v.setTextViewText(R.id.db_current_title, "Zugriff fehlt")
                 v.setTextViewText(R.id.db_next_label, "")
@@ -59,14 +59,14 @@ object DayBarUpdater {
             // Ganztägige Termine
             val firstAllDay = s.allDayToday.firstOrNull()
             if (firstAllDay != null) {
-                v.setViewVisibility(R.id.db_allday_row, View.VISIBLE)
+                setAllDayVisible(v, View.VISIBLE)
                 v.setTextViewText(R.id.db_allday_title, firstAllDay.title)
                 val detail = allDayDetail(s.allDayToday, s)
                 v.setTextViewText(R.id.db_allday_detail, detail)
                 v.setViewVisibility(R.id.db_allday_detail, if (detail.isEmpty()) View.GONE else View.VISIBLE)
                 v.setOnClickPendingIntent(R.id.db_allday_row, WidgetUpdater.eventIntent(context, firstAllDay, base + 5))
             } else {
-                v.setViewVisibility(R.id.db_allday_row, View.GONE)
+                setAllDayVisible(v, View.GONE)
             }
 
             // Fußzeile links: laufender Termin
@@ -131,6 +131,12 @@ object DayBarUpdater {
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
         canvas.drawLine(0f, 9 * density, widthPx.toFloat(), 9 * density, linePaint)
         return bmp
+    }
+
+    /** Kapsel und der Zwischenraum darüber werden immer gemeinsam ein-/ausgeblendet. */
+    private fun setAllDayVisible(v: RemoteViews, visibility: Int) {
+        v.setViewVisibility(R.id.db_allday_row, visibility)
+        v.setViewVisibility(R.id.db_allday_gap, visibility)
     }
 
     /** Zusatz in der Kapsel: „ · bis So.“ (mehrtägig, < 7 Tage), „ · bis 02.11.“, „ · +1“ (weitere). */
