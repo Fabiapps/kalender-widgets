@@ -21,6 +21,8 @@ object DayBarUpdater {
     private const val LEAD_MS = 1 * HOUR_MS
     private const val AHEAD_MS = 12 * HOUR_MS
     private const val LABEL_STEP_HOURS = 3
+    // Muss zur Höhe von db_timeline in den Layouts passen
+    private const val TIMELINE_HEIGHT_DP = 34
 
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
         val glass = WidgetPrefs.widgetGlass(context, widgetId)
@@ -127,7 +129,7 @@ object DayBarUpdater {
         val density = context.resources.displayMetrics.density
         val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 250).coerceAtLeast(200)
         val widthPx = (widthDp * density).toInt()
-        val heightPx = (28 * density).toInt().coerceAtLeast(1)
+        val heightPx = (TIMELINE_HEIGHT_DP * density).toInt().coerceAtLeast(1)
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
@@ -158,7 +160,7 @@ object DayBarUpdater {
         val windowEnd = s.now + AHEAD_MS
         val visible = s.allEvents.filter { !it.allDay && it.end > windowStart && it.begin < windowEnd }
 
-        val heightPx = (28 * density).toInt().coerceAtLeast(1)
+        val heightPx = (TIMELINE_HEIGHT_DP * density).toInt().coerceAtLeast(1)
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
 
@@ -170,7 +172,7 @@ object DayBarUpdater {
 
         val lineY = 9 * density
         val barH = 6 * density
-        val labelY = 23 * density
+        val labelY = 29 * density
         val totalMs = (windowEnd - windowStart).toFloat()
 
         // Basislinie
