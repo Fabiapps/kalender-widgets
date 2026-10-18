@@ -38,7 +38,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- Kopfzeile: Uhrzeit links, Wochentag + Datum rechts, Ganztägig als Kapsel dazwischen -->
+        <!-- Kopfzeile: Uhrzeit, Kapsel (ganztägig) und Datum auf einer Höhe; Wochentag über dem Datum -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,12 +58,69 @@
                 android:textColor="@color/mono_text"
                 android:textSize="40sp" />
 
-            <!-- Wochentag oben; darunter Kapsel (ganztägige Termine) auf einer Ebene mit dem Datum -->
-            <LinearLayout
+            <!-- Freier Platz zwischen Uhr und Datum; Kapsel (ganztägige Termine) rechtsbündig darin -->
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1">
+
+                <FrameLayout
+                    android:id="@+id/db_allday_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/db_allday_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/capsule"
+                        android:tint="@color/mono_line_solid" />
+
+                    <!-- Titel kürzt sich zuerst (weight), „· bis …“ bleibt sichtbar -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="8dp"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="2dp">
+
+                        <TextView
+                            android:id="@+id/db_allday_title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Feiertag"
+                            android:textColor="@color/mono_text"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/db_allday_detail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:text=" · bis So."
+                            android:textColor="@color/mono_muted_solid"
+                            android:textSize="11sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <!-- Wochentag über dem Datum. Der unsichtbare Platzhalter darunter gleicht den
+                 Wochentag aus, damit die Datumszeile mittig zu Uhr und Kapsel steht. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:gravity="end"
                 android:orientation="vertical">
 
@@ -79,81 +136,26 @@
                     android:textColor="@color/mono_muted_solid"
                     android:textSize="11sp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextClock
+                    android:id="@+id/db_date"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:fontFamily="monospace"
+                    android:format12Hour="dd.MM."
+                    android:format24Hour="dd.MM."
+                    android:letterSpacing="0.06"
+                    android:textAllCaps="true"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="11sp" />
 
-                    <!-- Nimmt den freien Platz; die Kapsel darin schrumpft bei Bedarf -->
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1">
-
-                        <FrameLayout
-                            android:id="@+id/db_allday_row"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end|center_vertical"
-                            android:visibility="gone">
-
-                            <ImageView
-                                android:id="@+id/db_allday_bg"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:importantForAccessibility="no"
-                                android:scaleType="fitXY"
-                                android:src="@drawable/capsule"
-                                android:tint="@color/mono_line_solid" />
-
-                            <!-- Titel kürzt sich zuerst (weight), „· bis …“ bleibt sichtbar -->
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingStart="8dp"
-                                android:paddingTop="2dp"
-                                android:paddingEnd="8dp"
-                                android:paddingBottom="2dp">
-
-                                <TextView
-                                    android:id="@+id/db_allday_title"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:ellipsize="end"
-                                    android:maxLines="1"
-                                    android:text="Feiertag"
-                                    android:textColor="@color/mono_text"
-                                    android:textSize="11sp" />
-
-                                <TextView
-                                    android:id="@+id/db_allday_detail"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:text=" · bis So."
-                                    android:textColor="@color/mono_muted_solid"
-                                    android:textSize="11sp"
-                                    android:visibility="gone" />
-                            </LinearLayout>
-                        </FrameLayout>
-                    </FrameLayout>
-
-                    <TextClock
-                        android:id="@+id/db_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="monospace"
-                        android:format12Hour="dd.MM."
-                        android:format24Hour="dd.MM."
-                        android:letterSpacing="0.06"
-                        android:textAllCaps="true"
-                        android:textColor="@color/mono_muted_solid"
-                        android:textSize="11sp" />
-                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:importantForAccessibility="no"
+                    android:text="MO."
+                    android:textSize="11sp"
+                    android:visibility="invisible" />
             </LinearLayout>
         </LinearLayout>
 
