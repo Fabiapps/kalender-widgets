@@ -42,7 +42,7 @@ object DayBarUpdater {
             for (id in intArrayOf(R.id.db_weekday, R.id.db_date, R.id.db_allday_detail, R.id.db_current_label, R.id.db_next_label)) {
                 v.setColorStateList(id, "setTextColor", p.muted)
             }
-            v.setColorStateList(R.id.db_allday_bg, "setImageTintList", p.line)
+            v.setColorStateList(R.id.db_allday_row, "setBackgroundTintList", p.line)
             v.setOnClickPendingIntent(android.R.id.background, WidgetUpdater.calendarIntent(context, s.now, base + 3))
             v.setImageViewBitmap(R.id.db_timeline, timeline)
 
