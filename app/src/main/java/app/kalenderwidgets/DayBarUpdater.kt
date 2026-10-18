@@ -17,6 +17,11 @@ import java.util.Locale
 /** Baut Widget B (Tagesleiste) zusammen. */
 object DayBarUpdater {
 
+    private const val HOUR_MS = 60 * 60_000L
+    private const val LEAD_MS = 1 * HOUR_MS
+    private const val AHEAD_MS = 12 * HOUR_MS
+    private const val LABEL_STEP_HOURS = 3
+
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
         val glass = WidgetPrefs.widgetGlass(context, widgetId)
         val p = WidgetUpdater.palette(context, widgetId)
@@ -147,23 +152,11 @@ object DayBarUpdater {
         context: Context, s: Snapshot, widthPx: Int, density: Float, p: WidgetUpdater.Palette,
     ): Bitmap {
         val zone = s.zone
-        val timedToday = s.allEvents.filter { !it.allDay && it.firstDay(zone) == s.today }
 
-        // Zeitraum: Standard 08–20, immer mindestens 4 Stunden ab jetzt (aufgerundet auf die volle
-        // Stunde), auf heutige Termine erweitern
-        val nowZdt = Instant.ofEpochMilli(s.now).atZone(zone)
-        val pastFullHour = nowZdt.minute > 0 || nowZdt.second > 0
-        var startHour = minOf(8, nowZdt.hour)
-        var endHour = maxOf(20, nowZdt.hour + 4 + (if (pastFullHour) 1 else 0))
-        timedToday.forEach { event ->
-            val bZdt = Instant.ofEpochMilli(event.begin).atZone(zone)
-            val eZdt = Instant.ofEpochMilli(event.end).atZone(zone)
-            if (bZdt.toLocalDate() == s.today) startHour = minOf(startHour, bZdt.hour)
-            if (eZdt.toLocalDate() == s.today) endHour = maxOf(endHour, eZdt.hour + (if (eZdt.minute > 0) 1 else 0))
-        }
-        startHour = maxOf(startHour, 0)
-        endHour = minOf(endHour, 24)
-        endHour = maxOf(endHour, startHour + 4)
+        // Mitlaufendes Fenster: 1 Stunde vor jetzt bis 12 Stunden nach jetzt (auch über Mitternacht)
+        val windowStart = s.now - LEAD_MS
+        val windowEnd = s.now + AHEAD_MS
+        val visible = s.allEvents.filter { !it.allDay && it.end > windowStart && it.begin < windowEnd }
 
         val heightPx = (28 * density).toInt().coerceAtLeast(1)
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
@@ -178,21 +171,18 @@ object DayBarUpdater {
         val lineY = 9 * density
         val barH = 6 * density
         val labelY = 23 * density
-        val totalMin = (endHour - startHour) * 60f
+        val totalMs = (windowEnd - windowStart).toFloat()
 
         // Basislinie
         val linePaint = Paint().apply { color = lineColor; strokeWidth = density; isAntiAlias = true }
         canvas.drawLine(0f, lineY, widthPx.toFloat(), lineY, linePaint)
 
-        fun timeToX(ms: Long): Float {
-            val zdt = Instant.ofEpochMilli(ms).atZone(zone)
-            val min = (zdt.hour - startHour) * 60f + zdt.minute + zdt.second / 60f
-            return (min / totalMin * widthPx).coerceIn(0f, widthPx.toFloat())
-        }
+        fun timeToX(ms: Long): Float =
+            ((ms - windowStart) / totalMs * widthPx).coerceIn(0f, widthPx.toFloat())
 
         // Terminbalken
         val barPaint = Paint().apply { isAntiAlias = true }
-        timedToday.forEach { event ->
+        visible.forEach { event ->
             val x1 = timeToX(event.begin)
             val x2 = timeToX(event.end).coerceAtLeast(x1 + 3 * density)
             barPaint.color = when {
@@ -208,23 +198,23 @@ object DayBarUpdater {
         val nowPaint = Paint().apply { color = accentColor; strokeWidth = 2 * density; isAntiAlias = true }
         canvas.drawLine(nowX, lineY - 7 * density, nowX, lineY + 7 * density, nowPaint)
 
-        // 5 Stundenlabels: erste linksbündig, letzte rechtsbündig, mittlere zentriert
+        // Stundenlabels an vollen Stunden (alle 3 Stunden), zentriert, am Rand nach innen geschoben
         val labelPaint = Paint().apply {
             color = muteColor
             textSize = 10 * density
             typeface = Typeface.MONOSPACE
             isAntiAlias = true
+            textAlign = Paint.Align.CENTER
         }
-        val span = endHour - startHour
-        for (i in 0..4) {
-            val hour = startHour + i * span / 4
-            val x = i.toFloat() * widthPx / 4f
-            labelPaint.textAlign = when (i) {
-                0 -> Paint.Align.LEFT
-                4 -> Paint.Align.RIGHT
-                else -> Paint.Align.CENTER
+        val halfLabel = labelPaint.measureText("00") / 2f
+        var hour = Instant.ofEpochMilli(windowStart).atZone(zone).truncatedTo(ChronoUnit.HOURS)
+        while (hour.toInstant().toEpochMilli() <= windowEnd) {
+            val ms = hour.toInstant().toEpochMilli()
+            if (ms >= windowStart && hour.hour % LABEL_STEP_HOURS == 0) {
+                val x = timeToX(ms).coerceIn(halfLabel, widthPx - halfLabel)
+                canvas.drawText("%02d".format(hour.hour), x, labelY, labelPaint)
             }
-            canvas.drawText("%02d".format(hour), x, labelY, labelPaint)
+            hour = hour.plusHours(1)
         }
 
         return bmp
