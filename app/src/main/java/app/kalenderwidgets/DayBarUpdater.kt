@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.SizeF
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import java.time.Instant
@@ -21,6 +22,10 @@ object DayBarUpdater {
     private const val LEAD_MS = 1 * HOUR_MS
     private const val AHEAD_MS = 12 * HOUR_MS
     private const val LABEL_STEP_HOURS = 3
+    // Fußzeile: Abstand zwischen den Blöcken, Reserve für Messungenauigkeit, seitlicher Rand der Layouts
+    private const val FOOTER_GAP_DP = 16f
+    private const val TEXT_RESERVE_DP = 4f
+    private const val CONTENT_PADDING_DP = 16
     // Muss zur Höhe von db_timeline in den Layouts passen
     private const val TIMELINE_HEIGHT_DP = 34
 
@@ -71,33 +76,44 @@ object DayBarUpdater {
 
             // Fußzeile links: laufender Termin
             val current = s.current
+            val curLabel: String
+            val curTitle: String
             if (current != null) {
-                v.setTextViewText(R.id.db_current_label, "BIS ${WidgetUpdater.clock(current.end)}")
-                v.setTextViewText(R.id.db_current_title, current.title)
+                curLabel = "BIS ${WidgetUpdater.clock(current.end)}"
+                curTitle = current.title
                 v.setOnClickPendingIntent(R.id.db_footer_left, WidgetUpdater.eventIntent(context, current, base + 1))
             } else {
-                v.setTextViewText(R.id.db_current_label, "JETZT")
-                v.setTextViewText(R.id.db_current_title, "Frei")
+                curLabel = "JETZT"
+                curTitle = "Frei"
             }
 
-            // Fußzeile rechts: nächster Termin
+            // Fußzeile rechts: nächster Termin; anchor = Beginn, falls er in der Zeitleiste liegt
+            val nextLabel: String
+            val nextTitle: String
+            var anchor: Long? = null
             when {
                 s.allDayIsNext -> {
                     val first = s.nextAllDay.first()
-                    v.setTextViewText(R.id.db_next_label, WidgetUpdater.dayLabel(first.firstDay(s.zone), s.today))
-                    v.setTextViewText(R.id.db_next_title, first.title)
+                    nextLabel = WidgetUpdater.dayLabel(first.firstDay(s.zone), s.today)
+                    nextTitle = first.title
                     v.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, first, base + 2))
                 }
                 s.nextTimed != null -> {
-                    v.setTextViewText(R.id.db_next_label, nextStartLabel(s.nextTimed, s))
-                    v.setTextViewText(R.id.db_next_title, s.nextTimed.title)
+                    nextLabel = nextStartLabel(s.nextTimed, s)
+                    nextTitle = s.nextTimed.title
+                    if (s.nextTimed.begin < s.now + AHEAD_MS) anchor = s.nextTimed.begin
                     v.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, s.nextTimed, base + 2))
                 }
                 else -> {
-                    v.setTextViewText(R.id.db_next_label, "AB")
-                    v.setTextViewText(R.id.db_next_title, "Nichts mehr heute")
+                    nextLabel = "AB"
+                    nextTitle = "Nichts mehr heute"
                 }
             }
+            v.setTextViewText(R.id.db_current_label, curLabel)
+            v.setTextViewText(R.id.db_current_title, curTitle)
+            v.setTextViewText(R.id.db_next_label, nextLabel)
+            v.setTextViewText(R.id.db_next_title, nextTitle)
+            layoutFooter(v, context, options, s, curLabel, curTitle, nextLabel, nextTitle, anchor)
         }
 
         val vC = RemoteViews(context.packageName, R.layout.widget_day_bar_compact)
@@ -112,12 +128,56 @@ object DayBarUpdater {
         ))
     }
 
-    private fun drawTimeline(context: Context, s: Snapshot, options: Bundle, p: WidgetUpdater.Palette): Bitmap {
-        val density = context.resources.displayMetrics.density
-        val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0)
+    /**
+     * Positioniert die Fußzeile: links der laufende Termin (so breit wie sein Text, höchstens die
+     * halbe Breite), rechts der nächste Termin unter dem Beginn seines Balkens – mindestens
+     * FOOTER_GAP_DP hinter dem linken Text und nie über den rechten Rand hinaus. Liegt der
+     * nächste Termin nicht in der Zeitleiste, steht er rechtsbündig. Zu lange Namen werden gekürzt.
+     */
+    private fun layoutFooter(
+        v: RemoteViews, context: Context, options: Bundle, s: Snapshot,
+        curLabel: String, curTitle: String, nextLabel: String, nextTitle: String, anchor: Long?,
+    ) {
+        val footerW = (widgetWidthDp(options) - 2 * CONTENT_PADDING_DP).toFloat()
+        val maxBlock = footerW / 2f - FOOTER_GAP_DP / 2f
+        val curW = blockWidthDp(context, curLabel, curTitle).coerceAtMost(maxBlock)
+        val nextW = blockWidthDp(context, nextLabel, nextTitle).coerceAtMost(maxBlock)
+
+        val windowStart = s.now - LEAD_MS
+        val want = if (anchor != null) (anchor - windowStart).toFloat() / (LEAD_MS + AHEAD_MS) * footerW
+                   else footerW - nextW
+        val pos = want.coerceAtMost(footerW - nextW).coerceAtLeast(curW + FOOTER_GAP_DP)
+
+        val dip = TypedValue.COMPLEX_UNIT_DIP
+        v.setViewLayoutWidth(R.id.db_footer_left, curW, dip)
+        v.setViewLayoutWidth(R.id.db_footer_right, nextW, dip)
+        v.setViewLayoutMargin(R.id.db_footer_right, RemoteViews.MARGIN_START, pos - curW, dip)
+    }
+
+    /** Breite eines Fußzeilen-Blocks (Label 10sp Monospace, Titel 13sp) in dp, mit etwas Reserve. */
+    private fun blockWidthDp(context: Context, label: String, title: String): Float {
+        val dm = context.resources.displayMetrics
+        val paint = Paint().apply { isAntiAlias = true }
+        paint.typeface = Typeface.MONOSPACE
+        paint.letterSpacing = 0.06f
+        paint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10f, dm)
+        val labelW = paint.measureText(label)
+        paint.typeface = Typeface.DEFAULT
+        paint.letterSpacing = 0f
+        paint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13f, dm)
+        val titleW = paint.measureText(title)
+        return maxOf(labelW, titleW) / dm.density + TEXT_RESERVE_DP
+    }
+
+    /** Widget-Breite in dp, wie sie auch für die Zeitleiste verwendet wird. */
+    private fun widgetWidthDp(options: Bundle): Int =
+        options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0)
             .coerceAtLeast(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 250))
             .coerceAtLeast(200)
-        val widthPx = (widthDp * density).toInt()
+
+    private fun drawTimeline(context: Context, s: Snapshot, options: Bundle, p: WidgetUpdater.Palette): Bitmap {
+        val density = context.resources.displayMetrics.density
+        val widthPx = (widgetWidthDp(options) * density).toInt()
         return drawTimelineBitmap(context, s, widthPx, density, p)
     }
 
