@@ -11,6 +11,8 @@ import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
 import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 /** Baut Widget B (Tagesleiste) zusammen. */
 object DayBarUpdater {
@@ -84,7 +86,7 @@ object DayBarUpdater {
                     v.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, first, base + 2))
                 }
                 s.nextTimed != null -> {
-                    v.setTextViewText(R.id.db_next_label, "AB ${WidgetUpdater.clock(s.nextTimed.begin)}")
+                    v.setTextViewText(R.id.db_next_label, nextStartLabel(s.nextTimed, s))
                     v.setTextViewText(R.id.db_next_title, s.nextTimed.title)
                     v.setOnClickPendingIntent(R.id.db_footer_right, WidgetUpdater.eventIntent(context, s.nextTimed, base + 2))
                 }
@@ -126,6 +128,19 @@ object DayBarUpdater {
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
         canvas.drawLine(0f, 9 * density, widthPx.toFloat(), 9 * density, linePaint)
         return bmp
+    }
+
+    /** „AB 18:00“ heute, „MORGEN AB 18:00“, innerhalb einer Woche „MO. AB 18:00“, sonst mit Datum. */
+    private fun nextStartLabel(event: CalEvent, s: Snapshot): String {
+        val day = event.firstDay(s.zone)
+        val time = "AB ${WidgetUpdater.clock(event.begin)}"
+        val prefix = when {
+            day == s.today -> return time
+            day == s.today.plusDays(1) -> "MORGEN"
+            ChronoUnit.DAYS.between(s.today, day) < 7 -> WidgetUpdater.WEEKDAY.format(day)
+            else -> WidgetUpdater.WEEKDAY_DATE.format(day)
+        }
+        return "${prefix.uppercase(Locale.GERMAN)} $time"
     }
 
     private fun drawTimelineBitmap(
