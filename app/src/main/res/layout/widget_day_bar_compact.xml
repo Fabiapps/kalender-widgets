@@ -106,7 +106,8 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Wochentag über dem Datum; die Grundlinie des Datums (Kind 1) fluchtet mit der Uhrzeit -->
+            <!-- Wochentag über dem Datum, zusammen etwa so hoch wie die Uhrziffern;
+                 die Grundlinie des Datums (Kind 1) fluchtet mit der Uhrzeit -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -121,10 +122,11 @@
                     android:fontFamily="monospace"
                     android:format12Hour="EEE"
                     android:format24Hour="EEE"
-                    android:letterSpacing="0.06"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.04"
                     android:textAllCaps="true"
                     android:textColor="@color/mono_muted_solid"
-                    android:textSize="11sp" />
+                    android:textSize="16sp" />
 
                 <TextClock
                     android:id="@+id/db_date"
@@ -133,10 +135,11 @@
                     android:fontFamily="monospace"
                     android:format12Hour="dd.MM."
                     android:format24Hour="dd.MM."
-                    android:letterSpacing="0.06"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.04"
                     android:textAllCaps="true"
                     android:textColor="@color/mono_muted_solid"
-                    android:textSize="11sp" />
+                    android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
 
