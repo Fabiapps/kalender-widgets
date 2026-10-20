@@ -213,10 +213,10 @@ object WidgetUpdater {
         }
         for (id in intArrayOf(
             R.id.date, R.id.now_label, R.id.now_time, R.id.next_label, R.id.next_time, R.id.allday_count,
+            R.id.allday_tag,
         )) {
             v.setColorStateList(id, "setTextColor", p.muted)
         }
-        v.setColorStateList(R.id.allday_ring, "setImageTintList", p.muted)
         v.setColorStateList(R.id.divider, "setImageTintList", p.line)
 
         v.setOnClickPendingIntent(android.R.id.background, calendarIntent(context, s.now, base + 3))
@@ -225,10 +225,12 @@ object WidgetUpdater {
             v.setViewVisibility(R.id.allday_row, View.GONE)
             v.setTextViewText(R.id.now_label, "KALENDER")
             v.setTextViewText(R.id.now_title, "Zugriff fehlt")
-            v.setTextViewText(R.id.now_time, "Tippen zum Einrichten")
+            v.setViewVisibility(R.id.now_time, View.GONE)
             v.setViewVisibility(R.id.dots, View.GONE)
-            v.setViewVisibility(R.id.divider, View.GONE)
-            v.setViewVisibility(R.id.next_block, View.GONE)
+            // Hinweis unten statt rechts in der Label-Zeile (dort stehen sonst Uhrzeiten)
+            v.setViewVisibility(R.id.next_label, View.GONE)
+            v.setViewVisibility(R.id.next_time, View.GONE)
+            v.setTextViewText(R.id.next_title, "Tippen zum Einrichten")
             v.setOnClickPendingIntent(android.R.id.background, settingsIntent(context, base + 4))
             return v
         }
@@ -237,9 +239,10 @@ object WidgetUpdater {
         if (firstAllDay != null) {
             v.setViewVisibility(R.id.allday_row, View.VISIBLE)
             v.setTextViewText(R.id.allday_title, firstAllDay.title)
+            v.setTextViewText(R.id.allday_tag, allDayTag(firstAllDay, s.today, s.zone))
             val more = s.allDayToday.size - 1
             if (more > 0) {
-                v.setTextViewText(R.id.allday_count, "+$more")
+                v.setTextViewText(R.id.allday_count, "+$more ·")
                 v.setViewVisibility(R.id.allday_count, View.VISIBLE)
             } else {
                 v.setViewVisibility(R.id.allday_count, View.GONE)
@@ -276,7 +279,9 @@ object WidgetUpdater {
                 v.setViewVisibility(R.id.next_label, View.VISIBLE)
                 v.setTextViewText(R.id.next_label, dayLabel(first.firstDay(s.zone), s.today))
                 v.setTextViewText(R.id.next_title, first.title)
-                v.setTextViewText(R.id.next_time, allDayDetails(s.nextAllDay, s.zone))
+                val more = s.nextAllDay.size - 1
+                val tag = allDayTag(first, first.firstDay(s.zone), s.zone)
+                v.setTextViewText(R.id.next_time, if (more > 0) "+$more · $tag" else tag)
                 v.setViewVisibility(R.id.next_time, View.VISIBLE)
                 v.setOnClickPendingIntent(R.id.next_block, eventIntent(context, first, base + 2))
             }
@@ -315,18 +320,15 @@ object WidgetUpdater {
     fun dayLabel(day: LocalDate, today: LocalDate): String =
         if (day == today.plusDays(1)) "MORGEN" else WEEKDAY_DATE.format(day).uppercase(Locale.GERMAN)
 
-    fun allDayDetails(group: List<CalEvent>, zone: ZoneId): String {
-        val first = group.first()
-        val start = first.firstDay(zone)
-        val last = first.lastDay(zone)
-        return buildString {
-            append("ganztägig")
-            if (last.isAfter(start)) {
-                append(" · bis ")
-                append(if (ChronoUnit.DAYS.between(start, last) < 7) WEEKDAY.format(last) else DAY_MONTH.format(last))
-            }
-            if (group.size > 1) append(" · +${group.size - 1}")
-        }
+    /**
+     * Wann-Angabe eines ganztägigen Termins, gezählt ab [from]: „GANZTÄGIG“, wenn er an diesem Tag
+     * endet, sonst „BIS SO.“ (Ende in < 7 Tagen) bzw. „BIS 02.11.“.
+     */
+    fun allDayTag(event: CalEvent, from: LocalDate, zone: ZoneId): String {
+        val last = event.lastDay(zone)
+        if (!last.isAfter(from)) return "GANZTÄGIG"
+        val end = if (ChronoUnit.DAYS.between(from, last) < 7) WEEKDAY.format(last) else DAY_MONTH.format(last)
+        return "BIS ${end.uppercase(Locale.GERMAN)}"
     }
 
     fun clock(time: Long): String =
