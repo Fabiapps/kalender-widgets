@@ -51,8 +51,10 @@ object WidgetUpdater {
     private const val COUNTDOWN_WINDOW = 90 * MINUTE
 
     val DOT_IDS = intArrayOf(
-        R.id.dot_0, R.id.dot_1, R.id.dot_2, R.id.dot_3, R.id.dot_4, R.id.dot_5, R.id.dot_6,
-        R.id.dot_7, R.id.dot_8, R.id.dot_9, R.id.dot_10, R.id.dot_11, R.id.dot_12, R.id.dot_13,
+        R.id.dot_0, R.id.dot_1, R.id.dot_2, R.id.dot_3, R.id.dot_4,
+        R.id.dot_5, R.id.dot_6, R.id.dot_7, R.id.dot_8, R.id.dot_9,
+        R.id.dot_10, R.id.dot_11, R.id.dot_12, R.id.dot_13, R.id.dot_14,
+        R.id.dot_15, R.id.dot_16, R.id.dot_17, R.id.dot_18, R.id.dot_19,
     )
 
     val TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.GERMAN)
