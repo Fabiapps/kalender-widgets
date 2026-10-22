@@ -12,7 +12,8 @@
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
         android:src="@drawable/widget_shape"
-        android:tint="@color/mono_bg_solid" />
+        android:tint="@color/mono_bg_solid"
+        android:tintMode="src_in" />
 
     <!-- Milchglas-Optik (Glanz + Körnung), nur im Transparenz-Modus -->
     <ImageView
