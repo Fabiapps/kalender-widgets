@@ -28,7 +28,7 @@ class DayBarWidget : AppWidgetProvider() {
     }
 
     override fun onDisabled(context: Context) {
-        // NowNextWidget verwaltet den Alarm; nur Job abbrechen wenn auch A weg ist
+        // NowNextWidget verwaltet den Alarm; Job nur abbrechen, wenn kein Widget mehr da ist
         CalendarChangeJob.cancelIfNoWidgets(context)
     }
 

@@ -23,7 +23,9 @@ class NowNextWidget : AppWidgetProvider() {
 
     override fun onDisabled(context: Context) {
         val mgr = AppWidgetManager.getInstance(context)
-        if (mgr.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java)).isEmpty()) {
+        if (mgr.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java)).isEmpty() &&
+            mgr.getAppWidgetIds(ComponentName(context, MonthWidget::class.java)).isEmpty()
+        ) {
             WidgetUpdater.cancelRefresh(context)
         }
         CalendarChangeJob.cancelIfNoWidgets(context)
