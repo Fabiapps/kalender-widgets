@@ -41,12 +41,13 @@ class CalendarChangeJob : JobService() {
             context.getSystemService(JobScheduler::class.java)?.cancel(JOB_ID)
         }
 
-        /** Bricht den Job nur ab, wenn weder Widget A noch B mehr vorhanden sind. */
+        /** Bricht den Job nur ab, wenn kein Widget (A, B oder C) mehr vorhanden ist. */
         fun cancelIfNoWidgets(context: Context) {
             val mgr = AppWidgetManager.getInstance(context)
             val hasA = mgr.getAppWidgetIds(ComponentName(context, NowNextWidget::class.java)).isNotEmpty()
             val hasB = mgr.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java)).isNotEmpty()
-            if (!hasA && !hasB) cancel(context)
+            val hasC = mgr.getAppWidgetIds(ComponentName(context, MonthWidget::class.java)).isNotEmpty()
+            if (!hasA && !hasB && !hasC) cancel(context)
         }
     }
 }

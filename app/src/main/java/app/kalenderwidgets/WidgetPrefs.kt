@@ -1,6 +1,7 @@
 package app.kalenderwidgets
 
 import android.content.Context
+import java.time.LocalDate
 
 enum class Appearance { DARK, LIGHT, AUTO }
 
@@ -18,6 +19,8 @@ object WidgetPrefs {
     private const val KEY_WIDGET_ADAPTIVE = "widget_adaptive_"
     private const val KEY_WIDGET_GLASS = "widget_glass_"
     private const val KEY_WIDGET_CONFIGURED = "widget_configured_"
+    private const val KEY_MONTH_SELECTED = "month_selected_"
+    private const val KEY_MONTH_SELECTED_ON = "month_selected_on_"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
@@ -90,6 +93,24 @@ object WidgetPrefs {
             .remove(KEY_APPEARANCE + id)
             .remove(KEY_WIDGET_ADAPTIVE + id)
             .remove(KEY_WIDGET_GLASS + id)
+            .remove(KEY_MONTH_SELECTED + id)
+            .remove(KEY_MONTH_SELECTED_ON + id)
+            .apply()
+    }
+
+    // ---------- Widget C: gewählter Tag ----------
+
+    /** Im Monats-Widget gewählter Tag; gilt nur am Tag der Auswahl, danach wieder „heute“ (null). */
+    fun monthSelectedDay(context: Context, id: Int, today: LocalDate): LocalDate? {
+        val p = prefs(context)
+        if (p.getLong(KEY_MONTH_SELECTED_ON + id, Long.MIN_VALUE) != today.toEpochDay()) return null
+        return LocalDate.ofEpochDay(p.getLong(KEY_MONTH_SELECTED + id, today.toEpochDay()))
+    }
+
+    fun setMonthSelectedDay(context: Context, id: Int, day: LocalDate, today: LocalDate) {
+        prefs(context).edit()
+            .putLong(KEY_MONTH_SELECTED + id, day.toEpochDay())
+            .putLong(KEY_MONTH_SELECTED_ON + id, today.toEpochDay())
             .apply()
     }
 }
