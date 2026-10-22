@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Milchglas-Optik (hell): Glanz + Körnung über dem halbtransparenten Hintergrund -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Glanz: oben heller, läuft zur Mitte aus -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:centerColor="#00FFFFFF"
+                android:centerY="0.55"
+                android:endColor="#00FFFFFF"
+                android:startColor="#47FFFFFF"
+                android:type="linear" />
+            <corners android:radius="@android:dimen/system_app_widget_background_radius" />
+        </shape>
+    </item>
+    <!-- Feine Körnung -->
+    <item>
+        <bitmap
+            android:src="@drawable/frost_noise_light"
+            android:tileMode="repeat" />
+    </item>
+</layer-list>

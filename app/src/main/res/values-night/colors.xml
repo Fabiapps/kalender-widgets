@@ -2,7 +2,7 @@
 <resources>
     <!-- Automatisch, Nacht: dunkel (entspricht den mono_-Werten) -->
     <color name="auto_bg_solid">#FF0A0A0A</color>
-    <color name="auto_bg_glass">#8C0A0A0A</color>
+    <color name="auto_bg_glass">#730A0A0A</color>
     <color name="auto_text">#FFF5F5F5</color>
     <color name="auto_muted_solid">#FF9A9A9A</color>
     <color name="auto_muted_glass">#BDF5F5F5</color>
@@ -17,4 +17,7 @@
     <color name="auto_adaptive_text">@android:color/system_accent2_50</color>
     <color name="auto_adaptive_muted">@android:color/system_accent2_200</color>
     <color name="auto_adaptive_accent">@android:color/system_accent1_200</color>
+
+    <!-- Lichtkante im Transparenz-Modus, dunkel -->
+    <color name="glass_edge">#38FFFFFF</color>
 </resources>

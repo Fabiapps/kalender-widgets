@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Feine helle Kante, nur im Transparenz-Modus sichtbar -->
+<!-- Lichtkante, nur im Transparenz-Modus sichtbar; Deckkraft kommt per Tint (glass_edge*) -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="#00000000" />
     <stroke
         android:width="1dp"
-        android:color="#29FFFFFF" />
+        android:color="#FFFFFFFF" />
     <corners android:radius="@android:dimen/system_app_widget_background_radius" />
 </shape>

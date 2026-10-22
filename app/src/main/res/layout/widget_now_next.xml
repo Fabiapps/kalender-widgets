@@ -14,6 +14,16 @@
         android:src="@drawable/widget_shape"
         android:tint="@color/mono_bg_solid" />
 
+    <!-- Milchglas-Optik (Glanz + Körnung), nur im Transparenz-Modus -->
+    <ImageView
+        android:id="@+id/bg_frost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_frost"
+        android:visibility="gone" />
+
     <ImageView
         android:id="@+id/bg_stroke"
         android:layout_width="match_parent"
