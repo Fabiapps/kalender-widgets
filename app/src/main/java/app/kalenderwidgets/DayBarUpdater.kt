@@ -39,10 +39,8 @@ object DayBarUpdater {
         fun applyAll(v: RemoteViews) {
             // Hintergrund
             v.setColorStateList(R.id.db_bg_fill, "setImageTintList", p.background)
-            v.setViewVisibility(R.id.db_bg_stroke, if (glass) View.VISIBLE else View.GONE)
             v.setViewVisibility(R.id.db_bg_frost, if (glass) View.VISIBLE else View.GONE)
             v.setImageViewResource(R.id.db_bg_frost, p.frost)
-            v.setColorStateList(R.id.db_bg_stroke, "setImageTintList", p.edge)
             // Farben – alle Views upfront, vor jedem möglichen frühzeitigen Return
             for (id in intArrayOf(R.id.db_clock, R.id.db_allday_title, R.id.db_current_title, R.id.db_next_title)) {
                 v.setColorStateList(id, "setTextColor", p.text)

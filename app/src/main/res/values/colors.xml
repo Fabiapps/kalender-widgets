@@ -20,11 +20,6 @@
 
     <color name="icon_background">#FF0A0A0A</color>
 
-    <!-- Lichtkante im Transparenz-Modus (glass_edge: values = hell, values-night = dunkel) -->
-    <color name="glass_edge_light">#8CFFFFFF</color>
-    <color name="glass_edge_dark">#38FFFFFF</color>
-    <color name="glass_edge">#8CFFFFFF</color>
-
     <!-- Nothing-Gelb (aus Nothing-UI gemessen): laufender Termin in der Zeitleiste von Widget B -->
     <color name="nothing_yellow">#FFFFC700</color>
 
