@@ -69,6 +69,9 @@ object WidgetUpdater {
         val accent: Int,
         val dotOff: Int,
         val line: Int,
+        /** Milchglas-Ebene (Glanz + Körnung) und Lichtkante, nur im Transparenz-Modus sichtbar. */
+        val frost: Int,
+        val edge: Int,
     )
 
     fun palette(context: Context, widgetId: Int): Palette {
@@ -94,6 +97,8 @@ object WidgetUpdater {
                 accent = R.color.adaptive_accent,
                 dotOff = R.color.adaptive_dot_off,
                 line = R.color.adaptive_line,
+                frost = R.drawable.widget_frost_dark,
+                edge = R.color.glass_edge_dark,
             )
         } else {
             Palette(
@@ -103,6 +108,8 @@ object WidgetUpdater {
                 accent = R.color.mono_accent,
                 dotOff = if (glass) R.color.mono_dot_off_glass else R.color.mono_dot_off_solid,
                 line = if (glass) R.color.mono_line_glass else R.color.mono_line_solid,
+                frost = R.drawable.widget_frost_dark,
+                edge = R.color.glass_edge_dark,
             )
         }
 
@@ -115,6 +122,8 @@ object WidgetUpdater {
                 accent = R.color.adaptive_light_accent,
                 dotOff = R.color.adaptive_light_dot_off,
                 line = R.color.adaptive_light_line,
+                frost = R.drawable.widget_frost_light,
+                edge = R.color.glass_edge_light,
             )
         } else {
             Palette(
@@ -124,6 +133,8 @@ object WidgetUpdater {
                 accent = R.color.light_accent,
                 dotOff = if (glass) R.color.light_dot_off_glass else R.color.light_dot_off_solid,
                 line = if (glass) R.color.light_line_glass else R.color.light_line_solid,
+                frost = R.drawable.widget_frost_light,
+                edge = R.color.glass_edge_light,
             )
         }
 
@@ -136,6 +147,8 @@ object WidgetUpdater {
                 accent = R.color.auto_adaptive_accent,
                 dotOff = R.color.auto_adaptive_dot_off,
                 line = R.color.auto_adaptive_line,
+                frost = R.drawable.widget_frost,
+                edge = R.color.glass_edge,
             )
         } else {
             Palette(
@@ -145,6 +158,8 @@ object WidgetUpdater {
                 accent = R.color.auto_accent,
                 dotOff = if (glass) R.color.auto_dot_off_glass else R.color.auto_dot_off_solid,
                 line = if (glass) R.color.auto_line_glass else R.color.auto_line_solid,
+                frost = R.drawable.widget_frost,
+                edge = R.color.glass_edge,
             )
         }
 
@@ -208,6 +223,9 @@ object WidgetUpdater {
 
         v.setColorStateList(R.id.bg_fill, "setImageTintList", p.background)
         v.setViewVisibility(R.id.bg_stroke, if (glass) View.VISIBLE else View.GONE)
+        v.setViewVisibility(R.id.bg_frost, if (glass) View.VISIBLE else View.GONE)
+        v.setImageViewResource(R.id.bg_frost, p.frost)
+        v.setColorStateList(R.id.bg_stroke, "setImageTintList", p.edge)
         for (id in intArrayOf(
             R.id.clock_hour, R.id.clock_minute, R.id.now_title, R.id.next_title, R.id.allday_title,
         )) {

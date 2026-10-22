@@ -35,12 +35,21 @@ object WidgetPrefs {
         prefs(context).edit().putString(KEY_DEFAULT_APPEARANCE, v.name).apply()
     }
 
+    /** Gilt als Standard für neue Widgets und wird auf alle vorhandenen Widgets übertragen. */
     fun setAdaptiveColors(context: Context, value: Boolean) {
-        prefs(context).edit().putBoolean(KEY_ADAPTIVE, value).apply()
+        setGlobalAndAllWidgets(context, KEY_ADAPTIVE, KEY_WIDGET_ADAPTIVE, value)
     }
 
+    /** Gilt als Standard für neue Widgets und wird auf alle vorhandenen Widgets übertragen. */
     fun setGlass(context: Context, value: Boolean) {
-        prefs(context).edit().putBoolean(KEY_GLASS, value).apply()
+        setGlobalAndAllWidgets(context, KEY_GLASS, KEY_WIDGET_GLASS, value)
+    }
+
+    private fun setGlobalAndAllWidgets(context: Context, globalKey: String, widgetPrefix: String, value: Boolean) {
+        val p = prefs(context)
+        val edit = p.edit().putBoolean(globalKey, value)
+        p.all.keys.filter { it.startsWith(widgetPrefix) }.forEach { edit.putBoolean(it, value) }
+        edit.apply()
     }
 
     // ---------- Pro-Widget ----------

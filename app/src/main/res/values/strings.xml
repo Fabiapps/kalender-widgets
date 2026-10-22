@@ -17,9 +17,9 @@
     <string name="appearance_auto">Automatisch</string>
 
     <string name="setting_adaptive">Wallpaper-Farben</string>
-    <string name="setting_adaptive_hint">An: Das Widget übernimmt die Farbpalette deines Hintergrundbilds. Aus: klassische Farben.</string>
+    <string name="setting_adaptive_hint">An: Die Widgets übernehmen die Farbpalette deines Hintergrundbilds. Aus: klassische Farben. Gilt für alle Widgets.</string>
     <string name="setting_glass">Transparenz</string>
-    <string name="setting_glass_hint">Halbtransparenter Hintergrund mit feiner Kante. Einen echten Milchglas-Blur kann dieses Widget nicht erzeugen.</string>
+    <string name="setting_glass_hint">Milchglas-Optik: halbtransparenter Hintergrund mit feiner Körnung, Glanz und Lichtkante. Gilt für alle Widgets. Einen echten Unschärfe-Effekt (Blur) des Hintergrundbilds lässt Android bei Widgets nicht zu.</string>
 
     <string name="how_to_add">Widget hinzufügen: Homescreen gedrückt halten, „Widgets" wählen, dann „Kalender-Widgets" und das gewünschte Widget auf den Homescreen ziehen.</string>
     <string name="refresh_now">Widget jetzt aktualisieren</string>

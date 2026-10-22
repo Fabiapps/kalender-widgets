@@ -2,7 +2,7 @@
 <resources>
     <!-- Klassisch: Schwarz, Weiß, roter Akzent -->
     <color name="mono_bg_solid">#FF0A0A0A</color>
-    <color name="mono_bg_glass">#8C0A0A0A</color>
+    <color name="mono_bg_glass">#730A0A0A</color>
     <color name="mono_text">#FFF5F5F5</color>
     <color name="mono_muted_solid">#FF9A9A9A</color>
     <color name="mono_muted_glass">#BDF5F5F5</color>
@@ -20,12 +20,17 @@
 
     <color name="icon_background">#FF0A0A0A</color>
 
+    <!-- Lichtkante im Transparenz-Modus (glass_edge: values = hell, values-night = dunkel) -->
+    <color name="glass_edge_light">#8CFFFFFF</color>
+    <color name="glass_edge_dark">#38FFFFFF</color>
+    <color name="glass_edge">#8CFFFFFF</color>
+
     <!-- Nothing-Gelb (aus Nothing-UI gemessen): laufender Termin in der Zeitleiste von Widget B -->
     <color name="nothing_yellow">#FFFFC700</color>
 
     <!-- Hell, klassisch -->
     <color name="light_bg_solid">#FFF4F4F2</color>
-    <color name="light_bg_glass">#A8FFFFFF</color>
+    <color name="light_bg_glass">#85FFFFFF</color>
     <color name="light_text">#FF111111</color>
     <color name="light_muted_solid">#FF5C5C5C</color>
     <color name="light_muted_glass">#B3111111</color>
@@ -43,7 +48,7 @@
 
     <!-- Automatisch (values/ = hell, values-night/ = dunkel) -->
     <color name="auto_bg_solid">#FFF4F4F2</color>
-    <color name="auto_bg_glass">#A8FFFFFF</color>
+    <color name="auto_bg_glass">#85FFFFFF</color>
     <color name="auto_text">#FF111111</color>
     <color name="auto_muted_solid">#FF5C5C5C</color>
     <color name="auto_muted_glass">#B3111111</color>
