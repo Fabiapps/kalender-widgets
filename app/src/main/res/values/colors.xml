@@ -23,6 +23,11 @@
     <!-- Nothing-Gelb (aus Nothing-UI gemessen): laufender Termin in der Zeitleiste von Widget B -->
     <color name="nothing_yellow">#FFFFC700</color>
 
+    <!-- Widget C: heutiger Tag Nothing-Rot, ausgewählter Tag Nothing-Gelb (fest, in allen Paletten) -->
+    <color name="month_today">#FFD71921</color>
+    <color name="month_today_text">#FFFFFFFF</color>
+    <color name="month_selected_text">#FF111111</color>
+
     <!-- Hell, klassisch -->
     <color name="light_bg_solid">#FFF4F4F2</color>
     <color name="light_bg_glass">#85FFFFFF</color>
