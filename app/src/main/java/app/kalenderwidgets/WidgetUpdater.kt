@@ -71,8 +71,6 @@ object WidgetUpdater {
         val line: Int,
         /** Milchglas-Ebene (Glanz + Körnung), nur im Transparenz-Modus sichtbar. */
         val frost: Int,
-        /** Textfarbe auf einer Fläche in Textfarbe (z. B. heutiger Tag im Monatsraster). */
-        val onText: Int,
     )
 
     fun palette(context: Context, widgetId: Int): Palette {
@@ -99,7 +97,6 @@ object WidgetUpdater {
                 dotOff = R.color.adaptive_dot_off,
                 line = R.color.adaptive_line,
                 frost = R.drawable.widget_frost_dark,
-                onText = R.color.adaptive_bg_solid,
             )
         } else {
             Palette(
@@ -110,7 +107,6 @@ object WidgetUpdater {
                 dotOff = if (glass) R.color.mono_dot_off_glass else R.color.mono_dot_off_solid,
                 line = if (glass) R.color.mono_line_glass else R.color.mono_line_solid,
                 frost = R.drawable.widget_frost_dark,
-                onText = R.color.mono_bg_solid,
             )
         }
 
@@ -124,7 +120,6 @@ object WidgetUpdater {
                 dotOff = R.color.adaptive_light_dot_off,
                 line = R.color.adaptive_light_line,
                 frost = R.drawable.widget_frost_light,
-                onText = R.color.adaptive_light_bg_solid,
             )
         } else {
             Palette(
@@ -135,7 +130,6 @@ object WidgetUpdater {
                 dotOff = if (glass) R.color.light_dot_off_glass else R.color.light_dot_off_solid,
                 line = if (glass) R.color.light_line_glass else R.color.light_line_solid,
                 frost = R.drawable.widget_frost_light,
-                onText = R.color.light_bg_solid,
             )
         }
 
@@ -149,7 +143,6 @@ object WidgetUpdater {
                 dotOff = R.color.auto_adaptive_dot_off,
                 line = R.color.auto_adaptive_line,
                 frost = R.drawable.widget_frost,
-                onText = R.color.auto_adaptive_bg_solid,
             )
         } else {
             Palette(
@@ -160,7 +153,6 @@ object WidgetUpdater {
                 dotOff = if (glass) R.color.auto_dot_off_glass else R.color.auto_dot_off_solid,
                 line = if (glass) R.color.auto_line_glass else R.color.auto_line_solid,
                 frost = R.drawable.widget_frost,
-                onText = R.color.auto_bg_solid,
             )
         }
 

@@ -97,9 +97,11 @@ object MonthUpdater {
         v.setColorStateList(R.id.m_prev, "setImageTintList", p.text)
         v.setColorStateList(R.id.m_next, "setImageTintList", p.text)
         v.setColorStateList(R.id.m_month, "setTextColor", p.text)
+        // „HEUTE“-Pille: dezente Fläche, rote Schrift wie der heutige Tag
         v.setColorStateList(R.id.m_today, "setBackgroundTintList", p.line)
+        v.setColorStateList(R.id.m_today, "setTextColor", R.color.month_today)
         for (id in intArrayOf(
-            R.id.m_year, R.id.m_today, R.id.m_sel_label, R.id.m_empty,
+            R.id.m_year, R.id.m_sel_label, R.id.m_empty,
             R.id.m_wd_mo, R.id.m_wd_di, R.id.m_wd_mi, R.id.m_wd_do, R.id.m_wd_fr, R.id.m_wd_sa, R.id.m_wd_so,
         )) v.setColorStateList(id, "setTextColor", p.muted)
 
@@ -125,15 +127,15 @@ object MonthUpdater {
             val inMonth = YearMonth.from(day) == month
             v.setTextViewText(DAY_IDS[i], day.dayOfMonth.toString())
             when {
-                day == today -> {
+                day == today -> { // rot
                     v.setInt(DAY_IDS[i], "setBackgroundResource", R.drawable.day_pill)
-                    v.setColorStateList(DAY_IDS[i], "setBackgroundTintList", p.text)
-                    v.setColorStateList(DAY_IDS[i], "setTextColor", p.onText)
+                    v.setColorStateList(DAY_IDS[i], "setBackgroundTintList", R.color.month_today)
+                    v.setColorStateList(DAY_IDS[i], "setTextColor", R.color.month_today_text)
                 }
-                day == selected -> {
+                day == selected -> { // gelb
                     v.setInt(DAY_IDS[i], "setBackgroundResource", R.drawable.day_pill)
-                    v.setColorStateList(DAY_IDS[i], "setBackgroundTintList", p.dotOff)
-                    v.setColorStateList(DAY_IDS[i], "setTextColor", p.text)
+                    v.setColorStateList(DAY_IDS[i], "setBackgroundTintList", R.color.nothing_yellow)
+                    v.setColorStateList(DAY_IDS[i], "setTextColor", R.color.month_selected_text)
                 }
                 else -> {
                     v.setInt(DAY_IDS[i], "setBackgroundResource", 0)
