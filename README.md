@@ -4,7 +4,7 @@ Drei Android-Widgets für den Homescreen:
 
 - **„Jetzt & Danach"** (4×2): große Uhr, aktueller Termin mit Fortschrittspunkten, nächster Termin.
 - **„Tagesleiste"** (4×2): Uhrzeit, Canvas-Zeitleiste des heutigen Tages, laufender und nächster Termin.
-- **„Monat"** (4×4): Monatsraster mit Terminpunkten; Tippen auf einen Tag zeigt unten seine Termine.
+- **„Monat"** (4×4): Monatsraster mit Terminpunkten und Monatswechsel; Tippen auf einen Tag zeigt unten seine Termine (scrollbar), erneutes Tippen auf den gewählten Tag öffnet die Terminerstellung.
 
 Jedes Widget ist einzeln konfigurierbar (Erscheinungsbild, Wallpaper-Farben, Transparenz).
 In der App lassen sich die **Standardwerte für neue Widgets** einstellen.

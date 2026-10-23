@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Eine Zeile der scrollbaren Terminliste in Widget C: Uhrzeit | Titel | Wann-Angabe -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/m_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp">
+
+    <TextView
+        android:id="@+id/m_item_time"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.04"
+        android:maxLines="1"
+        android:text="09:00"
+        android:textColor="@color/mono_muted_solid"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@+id/m_item_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Termin"
+        android:textColor="@color/mono_text"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/m_item_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.08"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="@color/mono_muted_solid"
+        android:textSize="9sp" />
+</LinearLayout>

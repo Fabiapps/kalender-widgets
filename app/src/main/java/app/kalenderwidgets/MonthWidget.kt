@@ -5,9 +5,10 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 
-/** Widget C: Monatsansicht. Tippen auf einen Tag zeigt dessen Termine im Widget. */
+/** Widget C: Monatsansicht. Tippen auf einen Tag zeigt dessen Termine, Pfeile wechseln den Monat. */
 class MonthWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
@@ -29,13 +30,19 @@ class MonthWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         when (intent.action) {
-            MonthUpdater.ACTION_SELECT_DAY, MonthUpdater.ACTION_TODAY -> {
+            MonthUpdater.ACTION_SELECT_DAY, MonthUpdater.ACTION_TODAY,
+            MonthUpdater.ACTION_PREV, MonthUpdater.ACTION_NEXT -> {
                 val id = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
                 if (id == AppWidgetManager.INVALID_APPWIDGET_ID) return
                 val today = LocalDate.now(ZoneId.systemDefault())
-                val day = if (intent.action == MonthUpdater.ACTION_SELECT_DAY && intent.hasExtra(MonthUpdater.EXTRA_EPOCH_DAY))
-                    LocalDate.ofEpochDay(intent.getLongExtra(MonthUpdater.EXTRA_EPOCH_DAY, today.toEpochDay()))
-                else today
+                val shown = YearMonth.from(WidgetPrefs.monthSelectedDay(context, id, today) ?: today)
+                val day = when (intent.action) {
+                    MonthUpdater.ACTION_SELECT_DAY ->
+                        LocalDate.ofEpochDay(intent.getLongExtra(MonthUpdater.EXTRA_EPOCH_DAY, today.toEpochDay()))
+                    MonthUpdater.ACTION_PREV -> MonthUpdater.selectionForMonth(shown.minusMonths(1), today)
+                    MonthUpdater.ACTION_NEXT -> MonthUpdater.selectionForMonth(shown.plusMonths(1), today)
+                    else -> today
+                }
                 WidgetPrefs.setMonthSelectedDay(context, id, day, today)
                 AppWidgetManager.getInstance(context)
                     .updateAppWidget(id, MonthUpdater.buildViews(context, id, System.currentTimeMillis()))
