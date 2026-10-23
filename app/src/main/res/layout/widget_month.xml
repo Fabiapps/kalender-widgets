@@ -35,7 +35,7 @@
         android:paddingEnd="12dp"
         android:paddingBottom="14dp">
 
-        <!-- Kopfzeile: Monat (Tippen = zurück zu heute), Jahr, Monatswechsel -->
+        <!-- Kopfzeile: Monat (Tippen = zurück zu heute), „HEUTE“ (nur wenn nicht heute gewählt), Jahr, Monatswechsel -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,6 +55,25 @@
                 android:text="OKTOBER"
                 android:textColor="@color/mono_text"
                 android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/m_today"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/day_pill"
+                android:backgroundTint="@color/mono_line_solid"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.1"
+                android:maxLines="1"
+                android:paddingStart="8dp"
+                android:paddingTop="3dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="3dp"
+                android:text="HEUTE"
+                android:textColor="@color/month_today"
+                android:textSize="10sp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/m_year"

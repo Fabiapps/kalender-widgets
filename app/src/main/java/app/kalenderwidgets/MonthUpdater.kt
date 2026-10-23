@@ -97,6 +97,9 @@ object MonthUpdater {
         v.setColorStateList(R.id.m_prev, "setImageTintList", p.text)
         v.setColorStateList(R.id.m_next, "setImageTintList", p.text)
         v.setColorStateList(R.id.m_month, "setTextColor", p.text)
+        // „HEUTE“-Pille: dezente Fläche, rote Schrift wie der heutige Tag
+        v.setColorStateList(R.id.m_today, "setBackgroundTintList", p.line)
+        v.setColorStateList(R.id.m_today, "setTextColor", R.color.month_today)
         for (id in intArrayOf(
             R.id.m_year, R.id.m_sel_label, R.id.m_empty,
             R.id.m_wd_mo, R.id.m_wd_di, R.id.m_wd_mi, R.id.m_wd_do, R.id.m_wd_fr, R.id.m_wd_sa, R.id.m_wd_so,
@@ -106,7 +109,9 @@ object MonthUpdater {
         val month = YearMonth.from(selected)
         v.setTextViewText(R.id.m_month, MONTH.format(month).uppercase(Locale.GERMAN))
         v.setTextViewText(R.id.m_year, month.year.toString())
+        v.setViewVisibility(R.id.m_today, if (selected != today) View.VISIBLE else View.GONE)
         v.setOnClickPendingIntent(R.id.m_month, broadcast(context, widgetId, ACTION_TODAY, null, base + RC_TODAY))
+        v.setOnClickPendingIntent(R.id.m_today, broadcast(context, widgetId, ACTION_TODAY, null, base + RC_TODAY))
         v.setOnClickPendingIntent(R.id.m_prev, broadcast(context, widgetId, ACTION_PREV, null, base + RC_PREV))
         v.setOnClickPendingIntent(R.id.m_next, broadcast(context, widgetId, ACTION_NEXT, null, base + RC_NEXT))
 
