@@ -416,13 +416,17 @@ object WidgetUpdater {
         return activityIntent(context, requestCode, Intent(Intent.ACTION_VIEW, uri))
     }
 
-    fun eventIntent(context: Context, event: CalEvent, requestCode: Int): PendingIntent {
-        val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id)
+    fun eventIntent(context: Context, event: CalEvent, requestCode: Int): PendingIntent =
+        activityIntent(context, requestCode, eventViewIntent(event.id, event.begin, event.end, event.allDay))
+
+    /** Intent, der einen Termin (bzw. diese Wiederholung) in der Kalender-App öffnet. */
+    fun eventViewIntent(eventId: Long, begin: Long, end: Long, allDay: Boolean): Intent {
+        val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId)
         val intent = Intent(Intent.ACTION_VIEW, uri)
-            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
-            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end)
-        if (event.allDay) intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true)
-        return activityIntent(context, requestCode, intent)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin)
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end)
+        if (allDay) intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true)
+        return intent
     }
 
     fun settingsIntent(context: Context, requestCode: Int): PendingIntent =

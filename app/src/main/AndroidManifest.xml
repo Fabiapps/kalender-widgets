@@ -28,6 +28,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Öffnet einen Termin aus der Liste von Widget C (unsichtbarer Zwischenschritt) -->
+        <activity
+            android:name=".EventOpenActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <!-- Widget A: Jetzt & Danach -->
         <receiver
             android:name=".NowNextWidget"
