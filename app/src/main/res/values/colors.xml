@@ -23,6 +23,9 @@
     <!-- Nothing-Gelb (aus Nothing-UI gemessen): laufender Termin in der Zeitleiste von Widget B -->
     <color name="nothing_yellow">#FFFFC700</color>
 
+    <!-- Widget D: Countdown kurz vor Terminbeginn -->
+    <color name="nothing_red">#FFD71921</color>
+
     <!-- Widget C: heutiger Tag Nothing-Rot, ausgewählter Tag Nothing-Gelb (fest, in allen Paletten) -->
     <color name="month_today">#FFD71921</color>
     <color name="month_today_text">#FFFFFFFF</color>

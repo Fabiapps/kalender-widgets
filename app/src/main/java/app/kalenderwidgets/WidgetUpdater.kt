@@ -71,6 +71,8 @@ object WidgetUpdater {
         val line: Int,
         /** Milchglas-Ebene (Glanz + Körnung), nur im Transparenz-Modus sichtbar. */
         val frost: Int,
+        /** Deckende Gegenfarbe zur Textfarbe, z. B. für Schrift auf gefüllten Pillen (Widget D). */
+        val inverse: Int,
     )
 
     fun palette(context: Context, widgetId: Int): Palette {
@@ -97,6 +99,7 @@ object WidgetUpdater {
                 dotOff = R.color.adaptive_dot_off,
                 line = R.color.adaptive_line,
                 frost = R.drawable.widget_frost_dark,
+                inverse = R.color.adaptive_bg_solid,
             )
         } else {
             Palette(
@@ -107,6 +110,7 @@ object WidgetUpdater {
                 dotOff = if (glass) R.color.mono_dot_off_glass else R.color.mono_dot_off_solid,
                 line = if (glass) R.color.mono_line_glass else R.color.mono_line_solid,
                 frost = R.drawable.widget_frost_dark,
+                inverse = R.color.mono_bg_solid,
             )
         }
 
@@ -120,6 +124,7 @@ object WidgetUpdater {
                 dotOff = R.color.adaptive_light_dot_off,
                 line = R.color.adaptive_light_line,
                 frost = R.drawable.widget_frost_light,
+                inverse = R.color.adaptive_light_bg_solid,
             )
         } else {
             Palette(
@@ -130,6 +135,7 @@ object WidgetUpdater {
                 dotOff = if (glass) R.color.light_dot_off_glass else R.color.light_dot_off_solid,
                 line = if (glass) R.color.light_line_glass else R.color.light_line_solid,
                 frost = R.drawable.widget_frost_light,
+                inverse = R.color.light_bg_solid,
             )
         }
 
@@ -143,6 +149,7 @@ object WidgetUpdater {
                 dotOff = R.color.auto_adaptive_dot_off,
                 line = R.color.auto_adaptive_line,
                 frost = R.drawable.widget_frost,
+                inverse = R.color.auto_adaptive_bg_solid,
             )
         } else {
             Palette(
@@ -153,6 +160,7 @@ object WidgetUpdater {
                 dotOff = if (glass) R.color.auto_dot_off_glass else R.color.auto_dot_off_solid,
                 line = if (glass) R.color.auto_line_glass else R.color.auto_line_solid,
                 frost = R.drawable.widget_frost,
+                inverse = R.color.auto_bg_solid,
             )
         }
 
@@ -161,7 +169,8 @@ object WidgetUpdater {
         val nowNextIds = manager.getAppWidgetIds(ComponentName(context, NowNextWidget::class.java))
         val dayBarIds = manager.getAppWidgetIds(ComponentName(context, DayBarWidget::class.java))
         val monthIds = manager.getAppWidgetIds(ComponentName(context, MonthWidget::class.java))
-        if (nowNextIds.isEmpty() && dayBarIds.isEmpty() && monthIds.isEmpty()) {
+        val sentenceIds = manager.getAppWidgetIds(ComponentName(context, SentenceWidget::class.java))
+        if (nowNextIds.isEmpty() && dayBarIds.isEmpty() && monthIds.isEmpty() && sentenceIds.isEmpty()) {
             cancelRefresh(context)
             return
         }
@@ -176,7 +185,10 @@ object WidgetUpdater {
         for (id in monthIds) {
             manager.updateAppWidget(id, MonthUpdater.buildViews(context, id, snapshot.now))
         }
-        scheduleRefresh(context, nextRefreshTime(snapshot))
+        for (id in sentenceIds) {
+            manager.updateAppWidget(id, SentenceUpdater.buildViews(context, id, snapshot))
+        }
+        scheduleRefresh(context, nextRefreshTime(snapshot, preciseCurrentEnd = sentenceIds.isNotEmpty()))
     }
 
     fun updateNowNext(context: Context, widgetId: Int) {
@@ -353,7 +365,12 @@ object WidgetUpdater {
 
     // ---------- Updates planen ----------
 
-    internal fun nextRefreshTime(s: Snapshot): Long {
+    /**
+     * Zeitpunkt des nächsten Refreshs. [preciseCurrentEnd]: Widget D zeigt in den letzten 90 Minuten
+     * eines laufenden Termins die Restzeit minutengenau („NOCH 47 MIN“) und braucht dann minütliche
+     * Updates; ohne Widget D bleibt es bei den bisherigen Zeitpunkten.
+     */
+    internal fun nextRefreshTime(s: Snapshot, preciseCurrentEnd: Boolean = false): Long {
         val now = s.now
         var t = now + MAX_INTERVAL
         s.current?.let { current ->
@@ -363,11 +380,18 @@ object WidgetUpdater {
                 val k = (now - current.begin) / step + 1
                 t = minOf(t, current.begin + k * step)
             }
+            if (preciseCurrentEnd) {
+                t = if (current.end - now < COUNTDOWN_WINDOW) minOf(t, (now / MINUTE + 1) * MINUTE)
+                    else minOf(t, current.end - COUNTDOWN_WINDOW)
+            }
         }
         s.nextTimed?.let { next ->
             t = minOf(t, next.begin)
             if (next.begin - now < COUNTDOWN_WINDOW) {
                 t = minOf(t, (now / MINUTE + 1) * MINUTE)
+            } else {
+                // Umschalten von „UM 18:00“ auf die Minutenangabe pünktlich 90 Minuten vorher
+                t = minOf(t, next.begin - COUNTDOWN_WINDOW)
             }
         }
         t = minOf(t, s.today.plusDays(1).atStartOfDay(s.zone).toInstant().toEpochMilli())

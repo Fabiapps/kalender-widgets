@@ -6,6 +6,8 @@
     <string name="widget_day_bar_name">Tagesleiste</string>
     <string name="widget_day_bar_description">Zeitleiste des heutigen Tages mit aktuellem und nächstem Termin</string>
     <string name="widget_month_name">Monat</string>
+    <string name="widget_sentence_name">Satz</string>
+    <string name="widget_sentence_description">Der Tag als kurzer Satz: Datum, laufender und nächster Termin mit Countdown</string>
     <string name="widget_month_description">Monatsübersicht mit Terminpunkten – auf einen Tag tippen zeigt seine Termine</string>
 
     <string name="permission_granted">Kalenderzugriff ist erlaubt. Das Widget zeigt Termine aus allen Kalendern, die auf diesem Handy synchronisiert und sichtbar sind.</string>

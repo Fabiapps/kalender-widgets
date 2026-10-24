@@ -94,6 +94,25 @@
                 android:resource="@xml/widget_month_info" />
         </receiver>
 
+        <!-- Widget D: Satz -->
+        <receiver
+            android:name=".SentenceWidget"
+            android:exported="true"
+            android:label="@string/widget_sentence_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_sentence_info" />
+        </receiver>
+
         <service
             android:name=".CalendarChangeJob"
             android:exported="false"
