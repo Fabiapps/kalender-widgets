@@ -4,12 +4,20 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 
 /** Widget D: der Tag als kurzer Satz mit Pillen. */
 class SentenceWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         WidgetUpdater.updateAll(context)
+    }
+
+    /** Neue Größe: Terminnamen bekommen den Platz neu zugeteilt, ggf. passt eine Zeile mehr. */
+    override fun onAppWidgetOptionsChanged(
+        context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle,
+    ) {
+        WidgetUpdater.updateSentence(context, appWidgetId, newOptions)
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {

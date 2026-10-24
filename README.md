@@ -5,7 +5,7 @@ Vier Android-Widgets für den Homescreen:
 - **„Jetzt & Danach"** (4×2): große Uhr, aktueller Termin mit Fortschrittspunkten, nächster Termin.
 - **„Tagesleiste"** (4×2): Uhrzeit, Canvas-Zeitleiste des heutigen Tages, laufender und nächster Termin.
 - **„Monat"** (4×4): Monatsraster mit Terminpunkten und Monatswechsel; Tippen auf einen Tag zeigt unten seine Termine (scrollbar), erneutes Tippen auf den gewählten Tag öffnet die Terminerstellung.
-- **„Satz"** (4×2): der Tag als kurzer Text mit Pillen, angelehnt an Nothings Satz-Ziffernblatt – Datum und Uhrzeit, laufender Termin mit Restzeit, nächster Termin mit Countdown (rot kurz vor Beginn).
+- **„Satz"** (4×2): der Tag als kurzer Text mit Pillen, angelehnt an Nothings Satz-Ziffernblatt – Datum und Uhrzeit, laufender Termin mit Restzeit und Ende, nächster Termin mit Countdown (rot kurz vor Beginn) und Ende, dazu der ganztägige bzw. übernächste Termin. Terminnamen nutzen die ganze Zeilenbreite.
 
 Jedes Widget ist einzeln konfigurierbar (Erscheinungsbild, Wallpaper-Farben, Transparenz).
 In der App lassen sich die **Standardwerte für neue Widgets** einstellen.
