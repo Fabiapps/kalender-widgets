@@ -35,7 +35,7 @@ object DayBarUpdater {
     private const val MAX_LANES = 3
 
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
-        val glass = WidgetPrefs.widgetGlass(context, widgetId)
+        val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
         val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 100 + 50
         val timeline = if (s.hasPermission) drawTimeline(context, s, options, p)

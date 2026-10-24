@@ -33,7 +33,7 @@ class WidgetConfigActivity : Activity() {
 
         val radioGroup = findViewById<RadioGroup>(R.id.rg_appearance)
         val switchAdaptive = findViewById<Switch>(R.id.cfg_switch_adaptive)
-        val switchGlass = findViewById<Switch>(R.id.cfg_switch_glass)
+        val rgBackdrop = findViewById<RadioGroup>(R.id.rg_backdrop)
         val btnSave = findViewById<Button>(R.id.btn_save_config)
 
         radioGroup.check(when (WidgetPrefs.appearance(this, appWidgetId)) {
@@ -42,7 +42,11 @@ class WidgetConfigActivity : Activity() {
             Appearance.AUTO -> R.id.rb_auto
         })
         switchAdaptive.isChecked = WidgetPrefs.widgetAdaptive(this, appWidgetId)
-        switchGlass.isChecked = WidgetPrefs.widgetGlass(this, appWidgetId)
+        rgBackdrop.check(when (WidgetPrefs.widgetBackdrop(this, appWidgetId)) {
+            Backdrop.SOLID -> R.id.rb_backdrop_solid
+            Backdrop.GLASS -> R.id.rb_backdrop_glass
+            Backdrop.CLEAR -> R.id.rb_backdrop_clear
+        })
 
         btnSave.setOnClickListener {
             val chosen = when (radioGroup.checkedRadioButtonId) {
@@ -50,7 +54,12 @@ class WidgetConfigActivity : Activity() {
                 R.id.rb_auto -> Appearance.AUTO
                 else -> Appearance.DARK
             }
-            WidgetPrefs.saveWidgetConfig(this, appWidgetId, chosen, switchAdaptive.isChecked, switchGlass.isChecked)
+            val backdrop = when (rgBackdrop.checkedRadioButtonId) {
+                R.id.rb_backdrop_solid -> Backdrop.SOLID
+                R.id.rb_backdrop_clear -> Backdrop.CLEAR
+                else -> Backdrop.GLASS
+            }
+            WidgetPrefs.saveWidgetConfig(this, appWidgetId, chosen, switchAdaptive.isChecked, backdrop)
             WidgetUpdater.updateAll(this)
             setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
             finish()

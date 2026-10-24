@@ -99,7 +99,7 @@ object SentenceUpdater {
     )
 
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
-        val glass = WidgetPrefs.widgetGlass(context, widgetId)
+        val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
         val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 100 + 80
         val (lines, background) = if (s.hasPermission) {

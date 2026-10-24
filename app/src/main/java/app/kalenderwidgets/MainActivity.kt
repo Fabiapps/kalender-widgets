@@ -51,10 +51,19 @@ class MainActivity : Activity() {
             WidgetUpdater.updateAll(this)
         }
 
-        val glass = findViewById<Switch>(R.id.switch_glass)
-        glass.isChecked = WidgetPrefs.glass(this)
-        glass.setOnCheckedChangeListener { _, checked ->
-            WidgetPrefs.setGlass(this, checked)
+        val rgBackdrop = findViewById<RadioGroup>(R.id.rg_default_backdrop)
+        rgBackdrop.check(when (WidgetPrefs.backdrop(this)) {
+            Backdrop.SOLID -> R.id.rb_default_backdrop_solid
+            Backdrop.GLASS -> R.id.rb_default_backdrop_glass
+            Backdrop.CLEAR -> R.id.rb_default_backdrop_clear
+        })
+        rgBackdrop.setOnCheckedChangeListener { _, id ->
+            val b = when (id) {
+                R.id.rb_default_backdrop_solid -> Backdrop.SOLID
+                R.id.rb_default_backdrop_clear -> Backdrop.CLEAR
+                else -> Backdrop.GLASS
+            }
+            WidgetPrefs.setBackdrop(this, b)
             WidgetUpdater.updateAll(this)
         }
 

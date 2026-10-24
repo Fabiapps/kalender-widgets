@@ -69,7 +69,7 @@ object WidgetUpdater {
         val accent: Int,
         val dotOff: Int,
         val line: Int,
-        /** Milchglas-Ebene (Glanz + Körnung), nur im Transparenz-Modus sichtbar. */
+        /** Milchglas-Ebene (Glanz + Körnung), nur beim Hintergrund „Milchglas“ sichtbar. */
         val frost: Int,
         /** Deckende Gegenfarbe zur Textfarbe, z. B. für Schrift auf gefüllten Pillen (Widget D). */
         val inverse: Int,
@@ -78,21 +78,33 @@ object WidgetUpdater {
     fun palette(context: Context, widgetId: Int): Palette {
         val appearance = WidgetPrefs.appearance(context, widgetId)
         val adaptive = WidgetPrefs.widgetAdaptive(context, widgetId)
-        val glass = WidgetPrefs.widgetGlass(context, widgetId)
-        return palette(appearance, adaptive, glass)
+        val backdrop = WidgetPrefs.widgetBackdrop(context, widgetId)
+        return palette(appearance, adaptive, backdrop)
     }
 
-    fun palette(appearance: Appearance, adaptive: Boolean, glass: Boolean): Palette =
-        when (appearance) {
-            Appearance.DARK -> darkPalette(adaptive, glass)
-            Appearance.LIGHT -> lightPalette(adaptive, glass)
-            Appearance.AUTO -> autoPalette(adaptive, glass)
+    fun palette(appearance: Appearance, adaptive: Boolean, backdrop: Backdrop): Palette {
+        // Nebentexte, Punkte und Linien: auf durchscheinendem Grund (Milchglas, transparent) die
+        // halbdurchsichtigen Varianten, die sich dem Hintergrundbild anpassen
+        val glass = backdrop != Backdrop.SOLID
+        return when (appearance) {
+            Appearance.DARK -> darkPalette(adaptive, backdrop, glass)
+            Appearance.LIGHT -> lightPalette(adaptive, backdrop, glass)
+            Appearance.AUTO -> autoPalette(adaptive, backdrop, glass)
+        }
+    }
+
+    /** Hintergrundfarbe: deckend, Milchglas oder ganz durchsichtig. */
+    private fun backgroundColor(backdrop: Backdrop, solid: Int, glass: Int): Int =
+        when (backdrop) {
+            Backdrop.SOLID -> solid
+            Backdrop.GLASS -> glass
+            Backdrop.CLEAR -> R.color.bg_clear
         }
 
-    private fun darkPalette(adaptive: Boolean, glass: Boolean): Palette =
+    private fun darkPalette(adaptive: Boolean, backdrop: Backdrop, glass: Boolean): Palette =
         if (adaptive) {
             Palette(
-                background = if (glass) R.color.adaptive_bg_glass else R.color.adaptive_bg_solid,
+                background = backgroundColor(backdrop, R.color.adaptive_bg_solid, R.color.adaptive_bg_glass),
                 text = R.color.adaptive_text,
                 muted = R.color.adaptive_muted,
                 accent = R.color.adaptive_accent,
@@ -103,7 +115,7 @@ object WidgetUpdater {
             )
         } else {
             Palette(
-                background = if (glass) R.color.mono_bg_glass else R.color.mono_bg_solid,
+                background = backgroundColor(backdrop, R.color.mono_bg_solid, R.color.mono_bg_glass),
                 text = R.color.mono_text,
                 muted = if (glass) R.color.mono_muted_glass else R.color.mono_muted_solid,
                 accent = R.color.mono_accent,
@@ -114,10 +126,10 @@ object WidgetUpdater {
             )
         }
 
-    private fun lightPalette(adaptive: Boolean, glass: Boolean): Palette =
+    private fun lightPalette(adaptive: Boolean, backdrop: Backdrop, glass: Boolean): Palette =
         if (adaptive) {
             Palette(
-                background = if (glass) R.color.adaptive_light_bg_glass else R.color.adaptive_light_bg_solid,
+                background = backgroundColor(backdrop, R.color.adaptive_light_bg_solid, R.color.adaptive_light_bg_glass),
                 text = R.color.adaptive_light_text,
                 muted = R.color.adaptive_light_muted,
                 accent = R.color.adaptive_light_accent,
@@ -128,7 +140,7 @@ object WidgetUpdater {
             )
         } else {
             Palette(
-                background = if (glass) R.color.light_bg_glass else R.color.light_bg_solid,
+                background = backgroundColor(backdrop, R.color.light_bg_solid, R.color.light_bg_glass),
                 text = R.color.light_text,
                 muted = if (glass) R.color.light_muted_glass else R.color.light_muted_solid,
                 accent = R.color.light_accent,
@@ -139,10 +151,10 @@ object WidgetUpdater {
             )
         }
 
-    private fun autoPalette(adaptive: Boolean, glass: Boolean): Palette =
+    private fun autoPalette(adaptive: Boolean, backdrop: Backdrop, glass: Boolean): Palette =
         if (adaptive) {
             Palette(
-                background = if (glass) R.color.auto_adaptive_bg_glass else R.color.auto_adaptive_bg_solid,
+                background = backgroundColor(backdrop, R.color.auto_adaptive_bg_solid, R.color.auto_adaptive_bg_glass),
                 text = R.color.auto_adaptive_text,
                 muted = R.color.auto_adaptive_muted,
                 accent = R.color.auto_adaptive_accent,
@@ -153,7 +165,7 @@ object WidgetUpdater {
             )
         } else {
             Palette(
-                background = if (glass) R.color.auto_bg_glass else R.color.auto_bg_solid,
+                background = backgroundColor(backdrop, R.color.auto_bg_solid, R.color.auto_bg_glass),
                 text = R.color.auto_text,
                 muted = if (glass) R.color.auto_muted_glass else R.color.auto_muted_solid,
                 accent = R.color.auto_accent,
@@ -232,7 +244,7 @@ object WidgetUpdater {
     }
 
     private fun buildNowNextViews(context: Context, widgetId: Int, s: Snapshot): RemoteViews {
-        val glass = WidgetPrefs.widgetGlass(context, widgetId)
+        val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
         val p = palette(context, widgetId)
         val base = widgetId * 100
         val v = RemoteViews(context.packageName, R.layout.widget_now_next)

@@ -7,7 +7,7 @@ Vier Android-Widgets für den Homescreen:
 - **„Monat"** (4×4): Monatsraster mit Terminpunkten und Monatswechsel; Tippen auf einen Tag zeigt unten seine Termine (scrollbar), erneutes Tippen auf den gewählten Tag öffnet die Terminerstellung.
 - **„Satz"** (4×2): der Tag als kurzer Text mit Pillen, angelehnt an Nothings Satz-Ziffernblatt – Datum und Uhrzeit, laufender Termin mit Restzeit und Ende, nächster Termin mit Countdown (rot kurz vor Beginn) und Ende, dazu der ganztägige bzw. übernächste Termin. Terminnamen nutzen die ganze Zeilenbreite.
 
-Jedes Widget ist einzeln konfigurierbar (Erscheinungsbild, Wallpaper-Farben, Transparenz).
+Jedes Widget ist einzeln konfigurierbar (Erscheinungsbild, Wallpaper-Farben, Hintergrund).
 In der App lassen sich die **Standardwerte für neue Widgets** einstellen.
 
 > Hinweis: Der Code wurde nicht auf einem echten Gerät getestet. Wenn der Build fehlschlägt oder das Widget
@@ -64,7 +64,7 @@ base64 -w0 release.jks > release.b64
 ## 6. Einrichten
 
 1. App **Kalender-Widgets** öffnen und **Kalenderzugriff erlauben**.
-2. Standardwerte einstellen: Erscheinungsbild (Dunkel / Hell / Automatisch), Wallpaper-Farben, Transparenz.
+2. Standardwerte einstellen: Erscheinungsbild (Dunkel / Hell / Automatisch), Wallpaper-Farben, Hintergrund (Deckend / Milchglas / Transparent).
 3. Homescreen gedrückt halten → **Widgets** → **Kalender-Widgets** → Widget ziehen.
 4. Beim Hinzufügen öffnet sich ein Einrichtungsdialog für dieses Widget.
    Nachträglich: Widget gedrückt halten → **Widget bearbeiten**.
@@ -106,7 +106,7 @@ base64 -w0 release.jks > release.b64
 ## Bekannte Grenzen
 
 - **Schrift:** Das Widget nutzt die Systemschrift.
-- **Kein echter Blur:** Transparenz-Modus ist halbtransparent ohne Weichzeichnung.
+- **Kein echter Blur:** Der Milchglas-Hintergrund ist halbtransparent ohne Weichzeichnung.
 - **Zeitleiste** nutzt `setImageViewBitmap`: bei Farbwechsel (Automatisch + Dark-Mode-Toggle)
   wird das Bitmap beim nächsten Update (spätestens 15 Min) neu gezeichnet. Für sofortigen
   Wechsel: App öffnen oder Widget aktualisieren.

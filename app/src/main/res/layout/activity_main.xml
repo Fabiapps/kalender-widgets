@@ -91,20 +91,47 @@
             android:text="@string/setting_adaptive_hint"
             android:textSize="13sp" />
 
-        <Switch
-            android:id="@+id/switch_glass"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:minHeight="48dp"
-            android:text="@string/setting_glass"
+            android:text="@string/setting_backdrop"
             android:textSize="17sp" />
+
+        <RadioGroup
+            android:id="@+id/rg_default_backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_default_backdrop_solid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/backdrop_solid" />
+
+            <RadioButton
+                android:id="@+id/rb_default_backdrop_glass"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/backdrop_glass" />
+
+            <RadioButton
+                android:id="@+id/rb_default_backdrop_clear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/backdrop_clear" />
+        </RadioGroup>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:alpha="0.75"
-            android:text="@string/setting_glass_hint"
+            android:text="@string/setting_backdrop_hint"
             android:textSize="13sp" />
 
         <TextView

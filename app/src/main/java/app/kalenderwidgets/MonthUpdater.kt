@@ -84,7 +84,7 @@ object MonthUpdater {
         val zone = ZoneId.systemDefault()
         val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
         val selected = WidgetPrefs.monthSelectedDay(context, widgetId, today) ?: today
-        val glass = WidgetPrefs.widgetGlass(context, widgetId)
+        val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
         val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 1000
         val v = RemoteViews(context.packageName, R.layout.widget_month)
