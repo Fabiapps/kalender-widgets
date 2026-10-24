@@ -30,7 +30,9 @@ object DayBarUpdater {
     private const val THIRD_MAX_SHIFT_DP = 24f
     private const val THIRD_MIN_TITLE_DP = 64f
     // Muss zur Höhe von db_timeline in den Layouts passen
-    private const val TIMELINE_HEIGHT_DP = 34
+    private const val TIMELINE_HEIGHT_DP = 38
+    // Hauptspur + zwei Unterspuren für überschneidende Termine
+    private const val MAX_LANES = 3
 
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
         val glass = WidgetPrefs.widgetGlass(context, widgetId)
@@ -88,7 +90,8 @@ object DayBarUpdater {
             val curLabel: String
             val curTitle: String
             if (current != null) {
-                curLabel = "BIS ${WidgetUpdater.clock(current.end)}"
+                val running = s.allEvents.count { !it.allDay && it.begin <= s.now && s.now < it.end }
+                curLabel = "BIS ${WidgetUpdater.clock(current.end)}" + if (running > 1) " · +${running - 1}" else ""
                 curTitle = current.title
                 v.setOnClickPendingIntent(R.id.db_footer_left, WidgetUpdater.eventIntent(context, current, base + 1))
             } else {
@@ -276,6 +279,22 @@ object DayBarUpdater {
         return "${prefix.uppercase(Locale.GERMAN)} $time"
     }
 
+    /**
+     * Ordnet Termine Spuren zu (0 = Hauptspur, 1–2 = Unterspuren): nach Beginn sortiert kommt jeder
+     * Termin in die oberste Spur, deren letzter Termin vor seinem Beginn endet. Mehr als drei
+     * gleichzeitige Termine landen in der untersten Spur.
+     */
+    private fun assignLanes(events: List<CalEvent>): Map<CalEvent, Int> {
+        val laneEnds = LongArray(MAX_LANES) { Long.MIN_VALUE }
+        val result = HashMap<CalEvent, Int>()
+        events.sortedWith(compareBy<CalEvent> { it.begin }.thenByDescending { it.end }).forEach { e ->
+            val lane = (0 until MAX_LANES).firstOrNull { laneEnds[it] <= e.begin } ?: (MAX_LANES - 1)
+            laneEnds[lane] = maxOf(laneEnds[lane], e.end)
+            result[e] = lane
+        }
+        return result
+    }
+
     private fun drawTimelineBitmap(
         context: Context, s: Snapshot, widthPx: Int, density: Float, p: WidgetUpdater.Palette,
     ): Bitmap {
@@ -298,7 +317,8 @@ object DayBarUpdater {
 
         val lineY = 9 * density
         val barH = 6 * density
-        val labelY = 29 * density
+        val subBarH = 3 * density
+        val labelY = 33 * density
         val totalMs = (windowEnd - windowStart).toFloat()
 
         // Basislinie
@@ -308,9 +328,15 @@ object DayBarUpdater {
         fun timeToX(ms: Long): Float =
             ((ms - windowStart) / totalMs * widthPx).coerceIn(0f, widthPx.toFloat())
 
-        // Terminbalken
+        // Terminbalken: Hauptspur auf der Linie; Termine, die sich mit einem früher begonnenen
+        // überschneiden (darin liegen oder parallel laufen), als dünne Balken in Unterspuren darunter
+        val lanes = assignLanes(visible)
+        val laneCenters = floatArrayOf(lineY, lineY + 7 * density, lineY + 11 * density)
         val barPaint = Paint().apply { isAntiAlias = true }
         visible.forEach { event ->
+            val lane = lanes.getValue(event)
+            val h = if (lane == 0) barH else subBarH
+            val y = laneCenters[lane]
             val x1 = timeToX(event.begin)
             val x2 = timeToX(event.end).coerceAtLeast(x1 + 3 * density)
             barPaint.color = when {
@@ -318,13 +344,15 @@ object DayBarUpdater {
                 event.begin <= s.now && s.now < event.end -> currentColor
                 else -> textColor
             }
-            canvas.drawRoundRect(x1, lineY - barH / 2f, x2, lineY + barH / 2f, 2 * density, 2 * density, barPaint)
+            canvas.drawRoundRect(x1, y - h / 2f, x2, y + h / 2f, h / 3f, h / 3f, barPaint)
         }
 
-        // „Jetzt"-Markierung: 14dp hoch (±7dp von der Basislinie)
+        // „Jetzt"-Markierung: 7dp über der Linie bis unter die tiefste benutzte Spur
+        val lowest = lanes.values.maxOrNull() ?: 0
+        val nowBottom = if (lowest == 0) lineY + 7 * density else laneCenters[lowest] + subBarH / 2f + 1.5f * density
         val nowX = timeToX(s.now)
         val nowPaint = Paint().apply { color = accentColor; strokeWidth = 2 * density; isAntiAlias = true }
-        canvas.drawLine(nowX, lineY - 7 * density, nowX, lineY + 7 * density, nowPaint)
+        canvas.drawLine(nowX, lineY - 7 * density, nowX, nowBottom, nowPaint)
 
         // Stundenlabels an vollen Stunden (alle 3 Stunden), zentriert, am Rand nach innen geschoben
         val labelPaint = Paint().apply {
