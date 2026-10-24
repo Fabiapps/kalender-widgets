@@ -66,4 +66,7 @@
     <color name="auto_adaptive_text">@android:color/system_accent2_900</color>
     <color name="auto_adaptive_muted">@android:color/system_accent2_600</color>
     <color name="auto_adaptive_accent">@android:color/system_accent1_600</color>
+
+    <!-- Hintergrund „Transparent“: keine Fläche, nur Schrift und Pillen -->
+    <color name="bg_clear">#00000000</color>
 </resources>
