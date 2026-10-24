@@ -233,6 +233,39 @@
                     android:textColor="@color/mono_text"
                     android:textSize="13sp" />
             </LinearLayout>
+
+            <!-- Übernächster Termin: nur sichtbar, wenn unter seinem Balken genug Platz ist (DayBarUpdater.layoutFooter) -->
+            <LinearLayout
+                android:id="@+id/db_footer_third"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/db_third_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:text="AB 21:00"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/db_third_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Abendessen"
+                    android:textColor="@color/mono_text"
+                    android:textSize="13sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Spacer unten: symmetrisch zum Spacer oben, zentriert den Block -->

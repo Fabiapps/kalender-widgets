@@ -26,6 +26,9 @@ object DayBarUpdater {
     private const val FOOTER_GAP_DP = 16f
     private const val TEXT_RESERVE_DP = 4f
     private const val CONTENT_PADDING_DP = 16
+    // Dritter Block: max. Verschiebung weg von seinem Balken, Mindestplatz für den Titel
+    private const val THIRD_MAX_SHIFT_DP = 24f
+    private const val THIRD_MIN_TITLE_DP = 64f
     // Muss zur Höhe von db_timeline in den Layouts passen
     private const val TIMELINE_HEIGHT_DP = 34
 
@@ -42,10 +45,15 @@ object DayBarUpdater {
             v.setViewVisibility(R.id.db_bg_frost, if (glass) View.VISIBLE else View.GONE)
             v.setImageViewResource(R.id.db_bg_frost, p.frost)
             // Farben – alle Views upfront, vor jedem möglichen frühzeitigen Return
-            for (id in intArrayOf(R.id.db_clock, R.id.db_allday_title, R.id.db_current_title, R.id.db_next_title)) {
+            for (id in intArrayOf(
+                R.id.db_clock, R.id.db_allday_title, R.id.db_current_title, R.id.db_next_title, R.id.db_third_title,
+            )) {
                 v.setColorStateList(id, "setTextColor", p.text)
             }
-            for (id in intArrayOf(R.id.db_weekday, R.id.db_date, R.id.db_allday_detail, R.id.db_current_label, R.id.db_next_label)) {
+            for (id in intArrayOf(
+                R.id.db_weekday, R.id.db_date, R.id.db_allday_detail, R.id.db_current_label, R.id.db_next_label,
+                R.id.db_third_label,
+            )) {
                 v.setColorStateList(id, "setTextColor", p.muted)
             }
             v.setColorStateList(R.id.db_allday_row, "setBackgroundTintList", p.line)
@@ -114,7 +122,13 @@ object DayBarUpdater {
             v.setTextViewText(R.id.db_current_title, curTitle)
             v.setTextViewText(R.id.db_next_label, nextLabel)
             v.setTextViewText(R.id.db_next_title, nextTitle)
-            layoutFooter(v, context, options, s, curLabel, curTitle, nextLabel, nextTitle, anchor)
+            // Kandidaten für einen dritten Block: spätere Termine mit Uhrzeit, die noch in der Zeitleiste liegen
+            val later = anchor?.let { nextBegin ->
+                s.allEvents
+                    .filter { !it.allDay && it.begin > nextBegin && it.begin < s.now + AHEAD_MS }
+                    .sortedBy { it.begin }
+            } ?: emptyList()
+            layoutFooter(v, context, options, s, curLabel, curTitle, nextLabel, nextTitle, anchor, later, base + 6)
         }
 
         val vC = RemoteViews(context.packageName, R.layout.widget_day_bar_compact)
@@ -134,10 +148,16 @@ object DayBarUpdater {
      * halbe Breite), rechts der nächste Termin unter dem Beginn seines Balkens – mindestens
      * FOOTER_GAP_DP hinter dem linken Text und nie über den rechten Rand hinaus. Liegt der
      * nächste Termin nicht in der Zeitleiste, steht er rechtsbündig. Zu lange Namen werden gekürzt.
+     *
+     * Optional ein dritter Block für einen späteren Termin aus [later] (nach Beginn sortiert):
+     * ebenfalls unter seinem Balken, höchstens THIRD_MAX_SHIFT_DP nach rechts verschoben, mit
+     * FOOTER_GAP_DP Abstand zum zweiten Block, und nur, wenn das Label ganz und vom Titel mindestens
+     * THIRD_MIN_TITLE_DP (oder der ganze Titel) Platz haben. Sonst bleibt er ausgeblendet.
      */
     private fun layoutFooter(
         v: RemoteViews, context: Context, options: Bundle, s: Snapshot,
         curLabel: String, curTitle: String, nextLabel: String, nextTitle: String, anchor: Long?,
+        later: List<CalEvent>, thirdRequestCode: Int,
     ) {
         val footerW = (widgetWidthDp(options) - 2 * CONTENT_PADDING_DP).toFloat()
         val maxBlock = footerW / 2f - FOOTER_GAP_DP / 2f
@@ -145,18 +165,46 @@ object DayBarUpdater {
         val nextW = blockWidthDp(context, nextLabel, nextTitle).coerceAtMost(maxBlock)
 
         val windowStart = s.now - LEAD_MS
-        val want = if (anchor != null) (anchor - windowStart).toFloat() / (LEAD_MS + AHEAD_MS) * footerW
-                   else footerW - nextW
+        fun xOf(time: Long): Float = (time - windowStart).toFloat() / (LEAD_MS + AHEAD_MS) * footerW
+        val want = if (anchor != null) xOf(anchor) else footerW - nextW
         val pos = want.coerceAtMost(footerW - nextW).coerceAtLeast(curW + FOOTER_GAP_DP)
 
         val dip = TypedValue.COMPLEX_UNIT_DIP
         v.setViewLayoutWidth(R.id.db_footer_left, curW, dip)
         v.setViewLayoutWidth(R.id.db_footer_right, nextW, dip)
         v.setViewLayoutMargin(R.id.db_footer_right, RemoteViews.MARGIN_START, pos - curW, dip)
+
+        // Dritter Block: erster spätere Termin, der unter seinem Balken genug Platz hat
+        val nextEnd = pos + nextW
+        for (e in later) {
+            val label = nextStartLabel(e, s)
+            val (labelW, titleW) = textWidthsDp(context, label, e.title)
+            val desired = xOf(e.begin)
+            val start = maxOf(desired, nextEnd + FOOTER_GAP_DP)
+            if (start - desired > THIRD_MAX_SHIFT_DP) continue // zu weit von seinem Balken entfernt
+            val full = maxOf(labelW, titleW) + TEXT_RESERVE_DP
+            val needed = maxOf(labelW, minOf(titleW, THIRD_MIN_TITLE_DP)) + TEXT_RESERVE_DP
+            val available = footerW - start
+            if (available < needed) break // spätere Termine lägen noch weiter rechts
+            v.setViewVisibility(R.id.db_footer_third, View.VISIBLE)
+            v.setTextViewText(R.id.db_third_label, label)
+            v.setTextViewText(R.id.db_third_title, e.title)
+            v.setViewLayoutWidth(R.id.db_footer_third, minOf(full, available), dip)
+            v.setViewLayoutMargin(R.id.db_footer_third, RemoteViews.MARGIN_START, start - nextEnd, dip)
+            v.setOnClickPendingIntent(R.id.db_footer_third, WidgetUpdater.eventIntent(context, e, thirdRequestCode))
+            return
+        }
+        v.setViewVisibility(R.id.db_footer_third, View.GONE)
     }
 
     /** Breite eines Fußzeilen-Blocks (Label 10sp Monospace, Titel 13sp) in dp, mit etwas Reserve. */
     private fun blockWidthDp(context: Context, label: String, title: String): Float {
+        val (labelW, titleW) = textWidthsDp(context, label, title)
+        return maxOf(labelW, titleW) + TEXT_RESERVE_DP
+    }
+
+    /** Gemessene Breiten von Label (10sp Monospace, gesperrt) und Titel (13sp) in dp. */
+    private fun textWidthsDp(context: Context, label: String, title: String): Pair<Float, Float> {
         val dm = context.resources.displayMetrics
         val paint = Paint().apply { isAntiAlias = true }
         paint.typeface = Typeface.MONOSPACE
@@ -167,7 +215,7 @@ object DayBarUpdater {
         paint.letterSpacing = 0f
         paint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13f, dm)
         val titleW = paint.measureText(title)
-        return maxOf(labelW, titleW) / dm.density + TEXT_RESERVE_DP
+        return Pair(labelW / dm.density, titleW / dm.density)
     }
 
     /** Widget-Breite in dp, wie sie auch für die Zeitleiste verwendet wird. */
