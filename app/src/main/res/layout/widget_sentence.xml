@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Widget D: Satz. Der Tag als kurzer Text in vier Zeilen mit Pillen, angelehnt an Nothings
-     Satz-Ziffernblatt. Jede Zeile hat dieselben Bausteine, die SentenceUpdater je nach Lage
-     befüllt oder ausblendet. Vorschau-Texte sind Beispiele. -->
+<!-- Widget D: Satz. Der Tag als kurzer Text in bis zu fünf Zeilen mit Pillen, angelehnt an Nothings
+     Satz-Ziffernblatt. Jede Satzzeile hat dieselben Bausteine in fester Reihenfolge (Text, Winkel,
+     Pfeil, gefüllte Pille, umrandete Pille, graue Zusatzinfo), die SentenceUpdater je nach Lage
+     befüllt oder ausblendet. Die Breite der Titel-Pillen setzt SentenceUpdater passend zum Platz.
+     Maße hier und dort zusammen ändern. Vorschau-Texte sind Beispiele. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
@@ -33,14 +35,14 @@
         android:gravity="center_vertical"
         android:orientation="vertical"
         android:paddingStart="18dp"
-        android:paddingTop="14dp"
+        android:paddingTop="8dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="14dp">
+        android:paddingBottom="8dp">
 
-        <!-- Zeile 1: Wochentag, Tag (gefüllt), Monat (umrandet), Uhrzeit (läuft live) -->
+        <!-- Zeile 1: Wochentag, Tag (rote Pille), Monat (umrandet), Uhrzeit (läuft live) -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="28dp">
+            android:layout_height="24dp">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -52,55 +54,58 @@
                     android:id="@+id/s_wd"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="6dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="SA"
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:text="SA" />
+                    android:visibility="visible" />
 
                 <TextView
                     android:id="@+id/s_day"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
                     android:background="@drawable/day_pill"
-                    android:backgroundTint="@color/mono_text"
+                    android:backgroundTint="@color/nothing_red"
                     android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:fontFamily="monospace"
-                    android:gravity="center_vertical"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="24"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_bg_solid"
-                    android:textSize="18sp" />
+                    android:textSize="16sp"
+                    android:text="24"
+                    android:textColor="@color/month_today_text"
+                    android:visibility="visible" />
 
                 <TextView
                     android:id="@+id/s_month"
                     android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
                     android:background="@drawable/pill_outline"
                     android:backgroundTint="@color/mono_text"
                     android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:fontFamily="monospace"
-                    android:gravity="center_vertical"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="OKT"
                     android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="OKT"
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp" />
+                    android:visibility="visible" />
 
                 <TextClock
                     android:id="@+id/s_clock"
@@ -113,7 +118,7 @@
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp" />
+                    android:textSize="16sp" />
             </LinearLayout>
         </FrameLayout>
 
@@ -121,10 +126,9 @@
         <FrameLayout
             android:id="@+id/s_l2"
             android:layout_width="match_parent"
-            android:layout_height="28dp"
+            android:layout_height="24dp"
             android:layout_marginTop="3dp">
 
-            <!-- wrap_content: Titel-Pillen (weight) werden nur gekürzt, wenn die Zeile zu lang ist -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -135,71 +139,48 @@
                     android:id="@+id/s_l2_lead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="6dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="JETZT"
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:text="JETZT" />
+                    android:visibility="visible" />
 
                 <TextView
-                    android:id="@+id/s_l2_fill"
-                    android:layout_width="0dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/day_pill"
+                    android:id="@+id/s_l2_bracket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bracket"
                     android:backgroundTint="@color/mono_text"
-                    android:ellipsize="end"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="4dp"
+                    android:paddingBottom="2dp"
                     android:fontFamily="monospace"
-                    android:gravity="center_vertical"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="Valencia Altstadt"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_bg_solid"
-                    android:visibility="visible"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/s_l2_outline"
-                    android:layout_width="0dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_outline"
-                    android:backgroundTint="@color/mono_text"
-                    android:ellipsize="end"
-                    android:fontFamily="monospace"
-                    android:gravity="center_vertical"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="0.02"
-                    android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="Termin"
-                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text=""
                     android:textColor="@color/mono_text"
-                    android:visibility="gone"
-                    android:textSize="18sp" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/s_l2_arrow"
-                    android:layout_width="36dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="32dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
                     android:background="@drawable/day_pill"
                     android:backgroundTint="@color/mono_text"
                     android:importantForAccessibility="no"
-                    android:paddingStart="8dp"
+                    android:paddingStart="7dp"
                     android:paddingTop="5dp"
-                    android:paddingEnd="8dp"
+                    android:paddingEnd="7dp"
                     android:paddingBottom="5dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_arrow_right"
@@ -208,37 +189,59 @@
                     android:visibility="gone" />
 
                 <TextView
+                    android:id="@+id/s_l2_fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/day_pill"
+                    android:backgroundTint="@color/nothing_yellow"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Meeting"
+                    android:textColor="@color/month_selected_text"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/s_l2_outline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/pill_outline"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Termin"
+                    android:textColor="@color/mono_text"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/s_l2_trail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:visibility="gone"
-                    android:text="" />
-
-                <TextView
-                    android:id="@+id/s_l2_bracket"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bracket"
-                    android:backgroundTint="@color/mono_text"
-                    android:fontFamily="monospace"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="0.02"
-                    android:maxLines="1"
-                    android:textAllCaps="true"
-                    android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:paddingStart="6dp"
-                    android:paddingEnd="4dp"
-                    android:paddingBottom="2dp"
+                    android:textSize="16sp"
                     android:text=""
+                    android:textColor="@color/mono_muted_solid"
                     android:visibility="gone" />
             </LinearLayout>
         </FrameLayout>
@@ -247,10 +250,9 @@
         <FrameLayout
             android:id="@+id/s_l3"
             android:layout_width="match_parent"
-            android:layout_height="28dp"
+            android:layout_height="24dp"
             android:layout_marginTop="3dp">
 
-            <!-- wrap_content: Titel-Pillen (weight) werden nur gekürzt, wenn die Zeile zu lang ist -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -261,71 +263,48 @@
                     android:id="@+id/s_l3_lead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="6dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="NOCH"
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:text="NOCH" />
+                    android:visibility="visible" />
 
                 <TextView
-                    android:id="@+id/s_l3_fill"
-                    android:layout_width="0dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/day_pill"
+                    android:id="@+id/s_l3_bracket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bracket"
                     android:backgroundTint="@color/mono_text"
-                    android:ellipsize="end"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="4dp"
+                    android:paddingBottom="2dp"
                     android:fontFamily="monospace"
-                    android:gravity="center_vertical"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="Termin"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_bg_solid"
-                    android:visibility="gone"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/s_l3_outline"
-                    android:layout_width="0dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_outline"
-                    android:backgroundTint="@color/mono_text"
-                    android:ellipsize="end"
-                    android:fontFamily="monospace"
-                    android:gravity="center_vertical"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="0.02"
-                    android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="Termin"
-                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="47 MIN"
                     android:textColor="@color/mono_text"
-                    android:visibility="gone"
-                    android:textSize="18sp" />
+                    android:visibility="visible" />
 
                 <ImageView
                     android:id="@+id/s_l3_arrow"
-                    android:layout_width="36dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="32dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
                     android:background="@drawable/day_pill"
                     android:backgroundTint="@color/mono_text"
                     android:importantForAccessibility="no"
-                    android:paddingStart="8dp"
+                    android:paddingStart="7dp"
                     android:paddingTop="5dp"
-                    android:paddingEnd="8dp"
+                    android:paddingEnd="7dp"
                     android:paddingBottom="5dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_arrow_right"
@@ -334,37 +313,59 @@
                     android:visibility="gone" />
 
                 <TextView
+                    android:id="@+id/s_l3_fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/day_pill"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Termin"
+                    android:textColor="@color/mono_bg_solid"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/s_l3_outline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/pill_outline"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Termin"
+                    android:textColor="@color/mono_text"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/s_l3_trail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:visibility="gone"
-                    android:text="" />
-
-                <TextView
-                    android:id="@+id/s_l3_bracket"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bracket"
-                    android:backgroundTint="@color/mono_text"
-                    android:fontFamily="monospace"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="0.02"
-                    android:maxLines="1"
-                    android:textAllCaps="true"
-                    android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:paddingStart="6dp"
-                    android:paddingEnd="4dp"
-                    android:paddingBottom="2dp"
-                    android:text="47 MIN"
+                    android:textSize="16sp"
+                    android:text="· BIS 15:00"
+                    android:textColor="@color/mono_muted_solid"
                     android:visibility="visible" />
             </LinearLayout>
         </FrameLayout>
@@ -373,10 +374,9 @@
         <FrameLayout
             android:id="@+id/s_l4"
             android:layout_width="match_parent"
-            android:layout_height="28dp"
+            android:layout_height="24dp"
             android:layout_marginTop="3dp">
 
-            <!-- wrap_content: Titel-Pillen (weight) werden nur gekürzt, wenn die Zeile zu lang ist -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -387,71 +387,48 @@
                     android:id="@+id/s_l4_lead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="6dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="DANN 16:30"
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:text="DANN" />
+                    android:visibility="visible" />
 
                 <TextView
-                    android:id="@+id/s_l4_fill"
-                    android:layout_width="0dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/day_pill"
+                    android:id="@+id/s_l4_bracket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bracket"
                     android:backgroundTint="@color/mono_text"
-                    android:ellipsize="end"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="4dp"
+                    android:paddingBottom="2dp"
                     android:fontFamily="monospace"
-                    android:gravity="center_vertical"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="Termin"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_bg_solid"
-                    android:visibility="gone"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/s_l4_outline"
-                    android:layout_width="0dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_outline"
-                    android:backgroundTint="@color/mono_text"
-                    android:ellipsize="end"
-                    android:fontFamily="monospace"
-                    android:gravity="center_vertical"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="0.02"
-                    android:maxLines="1"
-                    android:paddingStart="9dp"
-                    android:paddingEnd="9dp"
-                    android:text="Test"
-                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text=""
                     android:textColor="@color/mono_text"
-                    android:visibility="visible"
-                    android:textSize="18sp" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/s_l4_arrow"
-                    android:layout_width="36dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="32dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
                     android:background="@drawable/day_pill"
                     android:backgroundTint="@color/mono_text"
                     android:importantForAccessibility="no"
-                    android:paddingStart="8dp"
+                    android:paddingStart="7dp"
                     android:paddingTop="5dp"
-                    android:paddingEnd="8dp"
+                    android:paddingEnd="7dp"
                     android:paddingBottom="5dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_arrow_right"
@@ -460,38 +437,184 @@
                     android:visibility="visible" />
 
                 <TextView
+                    android:id="@+id/s_l4_fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/day_pill"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Termin"
+                    android:textColor="@color/mono_bg_solid"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/s_l4_outline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/pill_outline"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Sport"
+                    android:textColor="@color/mono_text"
+                    android:visibility="visible" />
+
+                <TextView
                     android:id="@+id/s_l4_trail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="7dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
-                    android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:visibility="visible"
-                    android:text="16:30" />
+                    android:textSize="16sp"
+                    android:text=""
+                    android:textColor="@color/mono_muted_solid"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Zeile 5 -->
+        <FrameLayout
+            android:id="@+id/s_l5"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginTop="3dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/s_l4_bracket"
+                    android:id="@+id/s_l5_lead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bracket"
-                    android:backgroundTint="@color/mono_text"
+                    android:layout_marginEnd="6dp"
                     android:fontFamily="monospace"
                     android:includeFontPadding="false"
                     android:letterSpacing="0.02"
                     android:maxLines="1"
                     android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text=""
                     android:textColor="@color/mono_text"
-                    android:textSize="18sp"
-                    android:paddingStart="6dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/s_l5_bracket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bracket"
+                    android:backgroundTint="@color/mono_text"
+                    android:paddingStart="5dp"
                     android:paddingEnd="4dp"
                     android:paddingBottom="2dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
                     android:text=""
+                    android:textColor="@color/mono_text"
                     android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/s_l5_arrow"
+                    android:layout_width="32dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/day_pill"
+                    android:backgroundTint="@color/mono_text"
+                    android:importantForAccessibility="no"
+                    android:paddingStart="7dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="7dp"
+                    android:paddingBottom="5dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_arrow_right"
+                    android:tint="@color/mono_bg_solid"
+                    android:tintMode="src_in"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/s_l5_fill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/day_pill"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Termin"
+                    android:textColor="@color/mono_bg_solid"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/s_l5_outline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/pill_outline"
+                    android:backgroundTint="@color/mono_text"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="Urlaub"
+                    android:textColor="@color/mono_text"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/s_l5_trail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.02"
+                    android:maxLines="1"
+                    android:textAllCaps="true"
+                    android:textSize="16sp"
+                    android:text="BIS SO."
+                    android:textColor="@color/mono_muted_solid"
+                    android:visibility="visible" />
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>

@@ -186,7 +186,8 @@ object WidgetUpdater {
             manager.updateAppWidget(id, MonthUpdater.buildViews(context, id, snapshot.now))
         }
         for (id in sentenceIds) {
-            manager.updateAppWidget(id, SentenceUpdater.buildViews(context, id, snapshot))
+            val options = manager.getAppWidgetOptions(id)
+            manager.updateAppWidget(id, SentenceUpdater.buildViews(context, id, snapshot, options))
         }
         scheduleRefresh(context, nextRefreshTime(snapshot, preciseCurrentEnd = sentenceIds.isNotEmpty()))
     }
@@ -201,6 +202,12 @@ object WidgetUpdater {
         val manager = AppWidgetManager.getInstance(context)
         val snapshot = loadSnapshot(context, System.currentTimeMillis())
         manager.updateAppWidget(widgetId, DayBarUpdater.buildViews(context, widgetId, snapshot, options))
+    }
+
+    fun updateSentence(context: Context, widgetId: Int, options: Bundle) {
+        val manager = AppWidgetManager.getInstance(context)
+        val snapshot = loadSnapshot(context, System.currentTimeMillis())
+        manager.updateAppWidget(widgetId, SentenceUpdater.buildViews(context, widgetId, snapshot, options))
     }
 
     internal fun loadSnapshot(context: Context, now: Long): Snapshot {
