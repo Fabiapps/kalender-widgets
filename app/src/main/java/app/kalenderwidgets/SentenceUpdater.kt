@@ -19,7 +19,9 @@ import kotlin.math.ceil
  *     DANN (TEST) [→] 16:30
  *
  * Gefüllte Pille = Hauptsache der Zeile, umrandete Pille = Nebensache (Monat, späterer Termin,
- * ganztägiger Termin). Zeitangaben sind ab 90 Minuten vorher minutengenau, davor absolut („UM 18:00“).
+ * ganztägiger Termin). Farben wie in den anderen Widgets: der heutige Tag ist eine rote Pille
+ * (wie in Widget C), der laufende Termin eine gelbe (wie sein Balken in Widget B).
+ * Zeitangaben sind ab 90 Minuten vorher minutengenau, davor absolut („UM 18:00“).
  */
 object SentenceUpdater {
 
@@ -40,6 +42,8 @@ object SentenceUpdater {
         val trail: String? = null,
         val bracket: String? = null,
         val urgent: Boolean = false,
+        /** Gefüllte Pille ist der laufende Termin: gelb statt in Textfarbe. */
+        val running: Boolean = false,
         val click: PendingIntent? = null,
     )
 
@@ -70,7 +74,9 @@ object SentenceUpdater {
         v.setTextViewText(R.id.s_month, MONTH.format(s.today).trimEnd('.').uppercase(Locale.GERMAN))
         v.setColorStateList(R.id.s_wd, "setTextColor", p.text)
         v.setColorStateList(R.id.s_clock, "setTextColor", p.text)
-        styleFilled(v, R.id.s_day, p)
+        // Heute: rote Pille mit weißer Zahl (wie der heutige Tag in Widget C)
+        v.setColorStateList(R.id.s_day, "setBackgroundTintList", R.color.nothing_red)
+        v.setColorStateList(R.id.s_day, "setTextColor", R.color.month_today_text)
         styleOutline(v, R.id.s_month, p)
 
         val lines = if (s.hasPermission) {
@@ -112,7 +118,7 @@ object SentenceUpdater {
                 allDayLine != null -> allDayLine
                 else -> Line(lead = "DANACH FREI")
             }
-            return listOf(Line(lead = "JETZT", fill = current.title, click = currentClick), until, last)
+            return listOf(Line(lead = "JETZT", fill = current.title, running = true, click = currentClick), until, last)
         }
 
         if (next == null || nextClick == null) {
@@ -155,7 +161,13 @@ object SentenceUpdater {
 
         v.setColorStateList(ids.lead, "setTextColor", p.text)
         v.setColorStateList(ids.trail, "setTextColor", p.text)
-        styleFilled(v, ids.fill, p)
+        if (line.running) {
+            // Laufender Termin: gelbe Pille mit dunkler Schrift (wie sein Balken in Widget B)
+            v.setColorStateList(ids.fill, "setBackgroundTintList", R.color.nothing_yellow)
+            v.setColorStateList(ids.fill, "setTextColor", R.color.month_selected_text)
+        } else {
+            styleFilled(v, ids.fill, p)
+        }
         styleOutline(v, ids.outline, p)
         v.setColorStateList(ids.arrow, "setBackgroundTintList", p.text)
         v.setColorStateList(ids.arrow, "setImageTintList", p.inverse)
