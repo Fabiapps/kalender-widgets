@@ -69,7 +69,7 @@ object WidgetUpdater {
         val accent: Int,
         val dotOff: Int,
         val line: Int,
-        /** Milchglas-Ebene (Glanz + Körnung), nur beim Hintergrund „Milchglas“ sichtbar. */
+        /** Milchglas-Ebene (Körnung), nur beim Hintergrund „Milchglas“ sichtbar. */
         val frost: Int,
         /** Deckende Gegenfarbe zur Textfarbe, z. B. für Schrift auf gefüllten Pillen (Widget D). */
         val inverse: Int,

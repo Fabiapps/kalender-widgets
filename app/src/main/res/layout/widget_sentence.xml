@@ -19,7 +19,7 @@
         android:tint="@color/mono_bg_solid"
         android:tintMode="src_in" />
 
-    <!-- Milchglas-Optik (Glanz + Körnung), nur im Transparenz-Modus -->
+    <!-- Milchglas-Optik (Körnung), nur beim Hintergrund „Milchglas“ -->
     <ImageView
         android:id="@+id/s_bg_frost"
         android:layout_width="match_parent"

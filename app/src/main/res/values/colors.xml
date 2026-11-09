@@ -2,7 +2,7 @@
 <resources>
     <!-- Klassisch: Schwarz, Weiß, roter Akzent -->
     <color name="mono_bg_solid">#FF0A0A0A</color>
-    <color name="mono_bg_glass">#730A0A0A</color>
+    <color name="mono_bg_glass">#B31C1C1E</color>
     <color name="mono_text">#FFF5F5F5</color>
     <color name="mono_muted_solid">#FF9A9A9A</color>
     <color name="mono_muted_glass">#BDF5F5F5</color>
@@ -33,13 +33,13 @@
 
     <!-- Hell, klassisch -->
     <color name="light_bg_solid">#FFF4F4F2</color>
-    <color name="light_bg_glass">#85FFFFFF</color>
+    <color name="light_bg_glass">#B8C8C9CB</color>
     <color name="light_text">#FF111111</color>
     <color name="light_muted_solid">#FF5C5C5C</color>
     <color name="light_muted_glass">#B3111111</color>
     <color name="light_accent">#FFD71921</color>
     <color name="light_dot_off_solid">#FFCFCFCC</color>
-    <color name="light_dot_off_glass">#FFCFCFCC</color>
+    <color name="light_dot_off_glass">#38111111</color>
     <color name="light_line_solid">#FFE2E2DF</color>
     <color name="light_line_glass">#2E111111</color>
 
@@ -51,13 +51,13 @@
 
     <!-- Automatisch (values/ = hell, values-night/ = dunkel) -->
     <color name="auto_bg_solid">#FFF4F4F2</color>
-    <color name="auto_bg_glass">#85FFFFFF</color>
+    <color name="auto_bg_glass">#B8C8C9CB</color>
     <color name="auto_text">#FF111111</color>
     <color name="auto_muted_solid">#FF5C5C5C</color>
     <color name="auto_muted_glass">#B3111111</color>
     <color name="auto_accent">#FFD71921</color>
     <color name="auto_dot_off_solid">#FFCFCFCC</color>
-    <color name="auto_dot_off_glass">#FFCFCFCC</color>
+    <color name="auto_dot_off_glass">#38111111</color>
     <color name="auto_line_solid">#FFE2E2DF</color>
     <color name="auto_line_glass">#2E111111</color>
 

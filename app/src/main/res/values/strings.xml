@@ -26,7 +26,7 @@
     <string name="backdrop_solid">Deckend</string>
     <string name="backdrop_glass">Milchglas</string>
     <string name="backdrop_clear">Transparent</string>
-    <string name="setting_backdrop_hint">Deckend: einfarbig hell bzw. dunkel. Milchglas: halbtransparent mit feiner Körnung und leichtem Glanz. Transparent: ganz ohne Hintergrund, nur Schrift und Pillen; die Schriftfarbe stellst du über das Erscheinungsbild passend zum Hintergrundbild ein. Gilt für alle Widgets. Einen echten Unschärfe-Effekt (Blur) des Hintergrundbilds lässt Android bei Widgets nicht zu.</string>
+    <string name="setting_backdrop_hint">Deckend: einfarbig hell bzw. dunkel. Milchglas: weitgehend deckendes Hellgrau bzw. Dunkelgrau mit feiner Körnung, angelehnt an Nothing OS 5. Transparent: ganz ohne Hintergrund, nur Schrift und Pillen; die Schriftfarbe stellst du über das Erscheinungsbild passend zum Hintergrundbild ein. Gilt für alle Widgets. Einen echten Unschärfe-Effekt (Blur) des Hintergrundbilds lässt Android bei Widgets nicht zu.</string>
 
     <string name="how_to_add">Widget hinzufügen: Homescreen gedrückt halten, „Widgets" wählen, dann „Kalender-Widgets" und das gewünschte Widget auf den Homescreen ziehen.</string>
     <string name="refresh_now">Widget jetzt aktualisieren</string>
