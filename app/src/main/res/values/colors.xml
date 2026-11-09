@@ -33,7 +33,7 @@
 
     <!-- Hell, klassisch -->
     <color name="light_bg_solid">#FFF4F4F2</color>
-    <color name="light_bg_glass">#B8C8C9CB</color>
+    <color name="light_bg_glass">#99FFFFFF</color>
     <color name="light_text">#FF111111</color>
     <color name="light_muted_solid">#FF5C5C5C</color>
     <color name="light_muted_glass">#B3111111</color>
@@ -51,7 +51,7 @@
 
     <!-- Automatisch (values/ = hell, values-night/ = dunkel) -->
     <color name="auto_bg_solid">#FFF4F4F2</color>
-    <color name="auto_bg_glass">#B8C8C9CB</color>
+    <color name="auto_bg_glass">#99FFFFFF</color>
     <color name="auto_text">#FF111111</color>
     <color name="auto_muted_solid">#FF5C5C5C</color>
     <color name="auto_muted_glass">#B3111111</color>
