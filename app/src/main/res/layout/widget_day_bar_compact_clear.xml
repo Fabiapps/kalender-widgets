@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Erzeugt aus widget_day_bar_compact.xml von tools/make_clear_layouts.py: dasselbe Layout mit Schatten unter
+     der Schrift für den Hintergrund „Transparent“. Nicht von Hand ändern. -->
+<!-- Widget B Kompakt (4×2): Elemente gleichmäßig über die Höhe verteilt, mind. 8dp Rand oben und unten. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/db_bg_fill"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_shape"
+        android:tint="@color/mono_bg_solid"
+        android:tintMode="src_in" />
+
+    <!-- Milchglas-Optik (Körnung), nur beim Hintergrund „Milchglas“ -->
+    <ImageView
+        android:id="@+id/db_bg_frost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_frost"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <!-- Gleich große, dehnbare Zwischenräume oben, zwischen den Elementen und unten:
+             bei viel Platz rücken die Elemente gleichmäßig auseinander, bei wenig Platz
+             schrumpfen nur die Zwischenräume und nichts wird abgeschnitten. -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Kopfzeile: Uhrzeit und Datum auf einer Grundlinie; Wochentag über dem Datum -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true"
+            android:orientation="horizontal">
+
+            <TextClock
+                android:id="@+id/db_clock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:fontFeatureSettings="tnum"
+                android:format12Hour="HH:mm"
+                android:format24Hour="HH:mm"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.03"
+                android:textColor="@color/mono_text"
+                android:textSize="40sp"
+                android:shadowColor="#99000000"
+                android:shadowDy="1"
+                android:shadowRadius="4" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <!-- Wochentag über dem Datum, zusammen etwa so hoch wie die Uhrziffern;
+                 die Grundlinie des Datums (Kind 1) fluchtet mit der Uhrzeit -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:baselineAlignedChildIndex="1"
+                android:gravity="end"
+                android:orientation="vertical">
+
+                <TextClock
+                    android:id="@+id/db_weekday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:format12Hour="EEE"
+                    android:format24Hour="EEE"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.04"
+                    android:textAllCaps="true"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="16sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+
+                <TextClock
+                    android:id="@+id/db_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:format12Hour="dd.MM."
+                    android:format24Hour="dd.MM."
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.04"
+                    android:textAllCaps="true"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="16sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/db_allday_gap"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <!-- Ganztägige Termine: Kapsel über die volle Breite, Text zentriert,
+             flacher als in der großen Variante (18dp).
+             Hintergrundfarbe kommt per setBackgroundTintList. -->
+        <LinearLayout
+            android:id="@+id/db_allday_row"
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:background="@drawable/capsule"
+            android:backgroundTint="@color/mono_line_solid"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:visibility="gone">
+
+            <!-- Titel kürzt sich zuerst (weight), „· bis …“ bleibt sichtbar -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/db_allday_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Feiertag"
+                    android:textColor="@color/mono_text"
+                    android:textSize="11sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+
+                <TextView
+                    android:id="@+id/db_allday_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text=" · bis So."
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="11sp"
+                    android:visibility="gone"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Zeitleiste (Canvas-Bitmap) -->
+        <ImageView
+            android:id="@+id/db_timeline"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:importantForAccessibility="no"
+            android:scaleType="fitXY" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Fußzeile: laufender Termin links; nächster Termin unter seinem Balken in der
+             Zeitleiste. Breiten und Abstand setzt DayBarUpdater.layoutFooter() per Code. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Links: laufender Termin -->
+            <LinearLayout
+                android:id="@+id/db_footer_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/db_current_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:text="BIS 15:00"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="10sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+
+                <TextView
+                    android:id="@+id/db_current_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Teammeeting"
+                    android:textColor="@color/mono_text"
+                    android:textSize="13sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+            </LinearLayout>
+
+            <!-- Rechts: nächster Termin -->
+            <LinearLayout
+                android:id="@+id/db_footer_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/db_next_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:text="AB 15:00"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="10sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+
+                <TextView
+                    android:id="@+id/db_next_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Bewerbergespräch"
+                    android:textColor="@color/mono_text"
+                    android:textSize="13sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+            </LinearLayout>
+
+            <!-- Übernächster Termin: nur sichtbar, wenn unter seinem Balken genug Platz ist (DayBarUpdater.layoutFooter) -->
+            <LinearLayout
+                android:id="@+id/db_footer_third"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/db_third_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.06"
+                    android:maxLines="1"
+                    android:text="AB 21:00"
+                    android:textColor="@color/mono_muted_solid"
+                    android:textSize="10sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+
+                <TextView
+                    android:id="@+id/db_third_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Abendessen"
+                    android:textColor="@color/mono_text"
+                    android:textSize="13sp"
+                    android:shadowColor="#99000000"
+                    android:shadowDy="1"
+                    android:shadowRadius="4" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+</FrameLayout>

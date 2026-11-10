@@ -73,6 +73,8 @@ object WidgetUpdater {
         val frost: Int,
         /** Deckende Gegenfarbe zur Textfarbe, z. B. für Schrift auf gefüllten Pillen (Widget D). */
         val inverse: Int,
+        /** Hintergrund „Transparent“: weiße Schrift, Layouts *_clear mit Schatten unter der Schrift. */
+        val clear: Boolean = false,
     )
 
     fun palette(context: Context, widgetId: Int): Palette {
@@ -83,6 +85,7 @@ object WidgetUpdater {
     }
 
     fun palette(appearance: Appearance, adaptive: Boolean, backdrop: Backdrop): Palette {
+        if (backdrop == Backdrop.CLEAR) return CLEAR_PALETTE
         // Nebentexte, Punkte und Linien: auf durchscheinendem Grund (Milchglas, transparent) die
         // halbdurchsichtigen Varianten, die sich dem Hintergrundbild anpassen
         val glass = backdrop != Backdrop.SOLID
@@ -92,6 +95,22 @@ object WidgetUpdater {
             Appearance.AUTO -> autoPalette(adaptive, backdrop, glass)
         }
     }
+
+    /**
+     * „Transparent“: immer weiße Schrift mit Schatten, unabhängig von Hell/Dunkel und Wallpaper-Farben,
+     * damit sie auf fast jedem Hintergrundbild lesbar ist; gefüllte Pillen weiß mit dunkler Schrift.
+     */
+    private val CLEAR_PALETTE = Palette(
+        background = R.color.bg_clear,
+        text = R.color.clear_text,
+        muted = R.color.clear_muted,
+        accent = R.color.mono_accent,
+        dotOff = R.color.clear_dot_off,
+        line = R.color.clear_line,
+        frost = R.drawable.widget_frost_dark,
+        inverse = R.color.month_selected_text,
+        clear = true,
+    )
 
     /** Hintergrundfarbe: deckend, Milchglas oder ganz durchsichtig. */
     private fun backgroundColor(backdrop: Backdrop, solid: Int, glass: Int): Int =
@@ -247,7 +266,7 @@ object WidgetUpdater {
         val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
         val p = palette(context, widgetId)
         val base = widgetId * 100
-        val v = RemoteViews(context.packageName, R.layout.widget_now_next)
+        val v = RemoteViews(context.packageName, if (p.clear) R.layout.widget_now_next_clear else R.layout.widget_now_next)
 
         v.setColorStateList(R.id.bg_fill, "setImageTintList", p.background)
         v.setViewVisibility(R.id.bg_frost, if (glass) View.VISIBLE else View.GONE)
