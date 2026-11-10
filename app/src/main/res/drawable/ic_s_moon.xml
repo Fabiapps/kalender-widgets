@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Symbol in Widget D: frei am Abend. Farbe kommt per Tint -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M15,13.2 A6.2,6.2 0 0 1 8.3,3.6 A6.6,6.6 0 1 0 15,13.2 Z" />
+</vector>
