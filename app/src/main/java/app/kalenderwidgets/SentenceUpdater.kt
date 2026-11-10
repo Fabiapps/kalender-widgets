@@ -52,6 +52,7 @@ object SentenceUpdater {
     private const val PILL_PADDING_DP = 8f + 8f
     private const val BRACKET_PADDING_DP = 5f + 4f
     private const val ARROW_DP = 32f
+    private const val ICON_DP = 18f
     /** Ab dieser Höhe passen fünf Zeilen (5 × 24dp + 4 × 3dp Abstand + 2 × 8dp Rand), sonst vier. */
     private const val FIVE_ROWS_MIN_HEIGHT_DP = 148f
 
@@ -72,15 +73,20 @@ object SentenceUpdater {
     private enum class Pill { FILLED, RUNNING, OUTLINE }
 
     /**
-     * Inhalt einer Satzzeile in fester Reihenfolge: Text, Winkel, Pfeil, Titel-Pille, graue
-     * Zusatzinfo. Leere Felder werden ausgeblendet; Pfeil und Zusatzinfo sind verzichtbar.
+     * Inhalt einer Satzzeile in fester Reihenfolge: Symbol, Text, Winkel, Pfeil, Symbol, Titel-Pille,
+     * graue Zusatzinfo. Leere Felder werden ausgeblendet; Pfeil, Symbol vor dem Namen und
+     * Zusatzinfo sind verzichtbar.
      */
     private class Line(
+        /** Symbol am Zeilenanfang (z. B. Mond bei „JETZT FREI“ am Abend). */
+        val startIcon: Int? = null,
         val lead: String? = null,
         val bracket: String? = null,
         val arrow: Boolean = false,
         val title: String? = null,
         val pill: Pill = Pill.OUTLINE,
+        /** Symbol vor dem Namen, passend zum Termin (Müll, Training …). */
+        val icon: Int? = null,
         val trail: String? = null,
         /** Winkel rot: der Termin beginnt gleich. */
         val urgent: Boolean = false,
@@ -88,19 +94,39 @@ object SentenceUpdater {
     )
 
     private class LineIds(
-        val row: Int, val lead: Int, val bracket: Int, val arrow: Int, val fill: Int, val outline: Int, val trail: Int,
+        val row: Int, val startIcon: Int, val lead: Int, val bracket: Int, val arrow: Int, val icon: Int,
+        val fill: Int, val outline: Int, val trail: Int,
     )
 
     private val LINE_IDS = arrayOf(
-        LineIds(R.id.s_l2, R.id.s_l2_lead, R.id.s_l2_bracket, R.id.s_l2_arrow, R.id.s_l2_fill, R.id.s_l2_outline, R.id.s_l2_trail),
-        LineIds(R.id.s_l3, R.id.s_l3_lead, R.id.s_l3_bracket, R.id.s_l3_arrow, R.id.s_l3_fill, R.id.s_l3_outline, R.id.s_l3_trail),
-        LineIds(R.id.s_l4, R.id.s_l4_lead, R.id.s_l4_bracket, R.id.s_l4_arrow, R.id.s_l4_fill, R.id.s_l4_outline, R.id.s_l4_trail),
-        LineIds(R.id.s_l5, R.id.s_l5_lead, R.id.s_l5_bracket, R.id.s_l5_arrow, R.id.s_l5_fill, R.id.s_l5_outline, R.id.s_l5_trail),
+        LineIds(
+            R.id.s_l2, R.id.s_l2_icon_start, R.id.s_l2_lead, R.id.s_l2_bracket, R.id.s_l2_arrow, R.id.s_l2_icon,
+            R.id.s_l2_fill, R.id.s_l2_outline, R.id.s_l2_trail,
+        ),
+        LineIds(
+            R.id.s_l3, R.id.s_l3_icon_start, R.id.s_l3_lead, R.id.s_l3_bracket, R.id.s_l3_arrow, R.id.s_l3_icon,
+            R.id.s_l3_fill, R.id.s_l3_outline, R.id.s_l3_trail,
+        ),
+        LineIds(
+            R.id.s_l4, R.id.s_l4_icon_start, R.id.s_l4_lead, R.id.s_l4_bracket, R.id.s_l4_arrow, R.id.s_l4_icon,
+            R.id.s_l4_fill, R.id.s_l4_outline, R.id.s_l4_trail,
+        ),
+        LineIds(
+            R.id.s_l5, R.id.s_l5_icon_start, R.id.s_l5_lead, R.id.s_l5_bracket, R.id.s_l5_arrow, R.id.s_l5_icon,
+            R.id.s_l5_fill, R.id.s_l5_outline, R.id.s_l5_trail,
+        ),
     )
 
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
-        val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
-        val p = WidgetUpdater.palette(context, widgetId)
+        val backdrop = WidgetPrefs.widgetBackdrop(context, widgetId)
+        val glass = backdrop == Backdrop.GLASS
+        val clear = backdrop == Backdrop.CLEAR
+        // Transparent: immer weiße Schrift mit Schatten (eigenes Layout), lesbar auf fast jedem Foto,
+        // unabhängig von Hell/Dunkel; gefüllte Pillen weiß mit dunkler Schrift
+        val p = WidgetUpdater.palette(context, widgetId).let {
+            if (clear) it.copy(text = R.color.clear_text, muted = R.color.clear_muted, inverse = R.color.month_selected_text)
+            else it
+        }
         val base = widgetId * 100 + 80
         val (lines, background) = if (s.hasPermission) {
             compose(context, s, base) to WidgetUpdater.calendarIntent(context, s.now, base)
@@ -111,7 +137,7 @@ object SentenceUpdater {
         val measure = Measure(context)
 
         fun views(size: SizeF): RemoteViews {
-            val v = RemoteViews(context.packageName, R.layout.widget_sentence)
+            val v = RemoteViews(context.packageName, if (clear) R.layout.widget_sentence_clear else R.layout.widget_sentence)
             v.setColorStateList(R.id.s_bg_fill, "setImageTintList", p.background)
             v.setViewVisibility(R.id.s_bg_frost, if (glass) View.VISIBLE else View.GONE)
             v.setImageViewResource(R.id.s_bg_frost, p.frost)
@@ -148,6 +174,7 @@ object SentenceUpdater {
         val allDayLine = s.allDayToday.firstOrNull()?.let {
             val more = s.allDayToday.size - 1
             Line(
+                icon = eventIcon(it.title) ?: R.drawable.ic_s_calendar,
                 title = caps(it.title),
                 trail = (if (more > 0) "+$more · " else "") + WidgetUpdater.allDayTag(it, s.today, s.zone),
                 click = WidgetUpdater.eventIntent(context, it, base + 2),
@@ -158,7 +185,10 @@ object SentenceUpdater {
         val nextClick = next?.let { WidgetUpdater.eventIntent(context, it, base + 3) }
         // Übernächster Termin, falls kein ganztägiger die letzte Zeile braucht
         val afterNextLine = upcoming.getOrNull(1)?.let {
-            Line(lead = "DANACH ${startLabel(it, s)}", title = caps(it.title), click = WidgetUpdater.eventIntent(context, it, base + 5))
+            Line(
+                lead = "DANACH ${startLabel(it, s)}", icon = eventIcon(it.title), title = caps(it.title),
+                click = WidgetUpdater.eventIntent(context, it, base + 5),
+            )
         }
 
         val current = s.current
@@ -176,12 +206,18 @@ object SentenceUpdater {
                 )
             }
             val then = if (next != null) {
-                Line(lead = "DANN ${startLabel(next, s)}", arrow = true, title = caps(next.title), click = nextClick)
+                Line(
+                    lead = "DANN ${startLabel(next, s)}", arrow = true, icon = eventIcon(next.title), title = caps(next.title),
+                    click = nextClick,
+                )
             } else {
                 Line(lead = "DANACH FREI")
             }
             return listOfNotNull(
-                Line(lead = "JETZT", title = caps(current.title), pill = Pill.RUNNING, click = currentClick),
+                Line(
+                    lead = "JETZT", icon = eventIcon(current.title), title = caps(current.title), pill = Pill.RUNNING,
+                    click = currentClick,
+                ),
                 until,
                 then,
                 allDayLine ?: afterNextLine,
@@ -189,13 +225,19 @@ object SentenceUpdater {
         }
 
         if (next == null || nextClick == null) {
-            return listOfNotNull(Line(lead = "JETZT FREI"), Line(lead = "NICHTS GEPLANT"), allDayLine)
+            return listOfNotNull(Line(startIcon = freeIcon(s), lead = "JETZT FREI"), Line(lead = "NICHTS GEPLANT"), allDayLine)
         }
         // „FREI BIS 21:00“ nur zusammen mit der Restzeit; sonst stünde die Uhrzeit doppelt da
         val soon = !next.allDay && next.begin - s.now < COUNTDOWN_MS
         return listOfNotNull(
-            Line(lead = if (soon) "FREI BIS ${WidgetUpdater.clock(next.begin)}" else "JETZT FREI", click = nextClick),
-            Line(lead = "DANN", arrow = true, title = caps(next.title), pill = Pill.FILLED, click = nextClick),
+            Line(
+                startIcon = freeIcon(s), lead = if (soon) "FREI BIS ${WidgetUpdater.clock(next.begin)}" else "JETZT FREI",
+                click = nextClick,
+            ),
+            Line(
+                lead = "DANN", arrow = true, icon = eventIcon(next.title), title = caps(next.title), pill = Pill.FILLED,
+                click = nextClick,
+            ),
             countdownLine(next, s, nextClick),
             allDayLine ?: afterNextLine,
         )
@@ -209,7 +251,10 @@ object SentenceUpdater {
         val day = next.firstDay(s.zone)
         if (next.allDay) {
             val tag = WidgetUpdater.allDayTag(next, day, s.zone).takeIf { it != "GANZTÄGIG" }
-            return Line(lead = dayLead(day, s.today), bracket = "GANZTÄGIG", trail = tag?.let { "· $it" }, click = click)
+            return Line(
+                startIcon = R.drawable.ic_s_calendar, lead = dayLead(day, s.today), bracket = "GANZTÄGIG",
+                trail = tag?.let { "· $it" }, click = click,
+            )
         }
         val end = "· BIS ${endLabel(next, s)}"
         val left = next.begin - s.now
@@ -249,9 +294,11 @@ object SentenceUpdater {
         val fit = fit(line, contentDp, m)
         val pillId = if (line.pill == Pill.OUTLINE) ids.outline else ids.fill
         v.setViewVisibility(ids.row, View.VISIBLE)
+        setIcon(v, ids.startIcon, line.startIcon, p)
         setText(v, ids.lead, line.lead)
         setText(v, ids.bracket, line.bracket)
         v.setViewVisibility(ids.arrow, if (fit.arrow) View.VISIBLE else View.GONE)
+        setIcon(v, ids.icon, line.icon.takeIf { fit.icon }, p)
         setText(v, ids.fill, line.title.takeIf { pillId == ids.fill })
         setText(v, ids.outline, line.title.takeIf { pillId == ids.outline })
         if (line.title != null) v.setViewLayoutWidth(pillId, fit.titleDp, TypedValue.COMPLEX_UNIT_DIP)
@@ -279,37 +326,42 @@ object SentenceUpdater {
     }
 
     /** Was von einer Zeile sichtbar ist und wie breit die Titel-Pille wird (dp). */
-    private class Fit(val arrow: Boolean, val trail: Boolean, val titleDp: Float)
+    private class Fit(val arrow: Boolean, val icon: Boolean, val trail: Boolean, val titleDp: Float)
 
     /**
-     * Verteilt die Zeilenbreite: Der Name soll ganz sichtbar sein. Der Pfeil ist nur Schmuck und
-     * bleibt nur, wenn der Name trotzdem ganz passt. Die graue Zusatzinfo weicht nur, wenn der Name
+     * Verteilt die Zeilenbreite: Der Name soll ganz sichtbar sein. Pfeil und Symbol davor sind nur
+     * Schmuck und bleiben nur, wenn der Name trotzdem ganz passt (der Pfeil weicht zuerst). Die graue Zusatzinfo weicht nur, wenn der Name
      * dadurch ganz passt oder ihm sonst weniger als MIN_TITLE_DP blieben. Was dann noch fehlt,
      * kürzt die Pille mit „…“.
      */
     private fun fit(line: Line, contentDp: Float, m: Measure): Fit {
         val limit = contentDp - SAFETY_DP
         // Breite aller sichtbaren Teile außer dem Namen, samt Abständen (auch dem zum Namen)
-        fun others(arrow: Boolean, trail: Boolean): Float {
+        fun others(arrow: Boolean, icon: Boolean, trail: Boolean): Float {
             val widths = listOfNotNull(
+                line.startIcon?.let { ICON_DP },
                 line.lead?.let { m.dp(it) },
                 line.bracket?.let { m.dp(it) + BRACKET_PADDING_DP },
                 if (arrow) ARROW_DP else null,
+                if (icon && line.icon != null) ICON_DP else null,
                 if (trail) line.trail?.let { m.dp(it) } else null,
             )
             val parts = widths.size + (if (line.title != null) 1 else 0)
             return widths.sum() + GAP_DP * (parts - 1).coerceAtLeast(0)
         }
         val hasTrail = line.trail != null
-        val title = line.title ?: return Fit(line.arrow, hasTrail && others(line.arrow, true) <= limit, 0f)
+        val hasIcon = line.icon != null
+        val title = line.title
+            ?: return Fit(line.arrow, hasIcon, hasTrail && others(line.arrow, hasIcon, true) <= limit, 0f)
 
         val need = m.dp(title) + PILL_PADDING_DP
-        fun room(arrow: Boolean, trail: Boolean) = limit - others(arrow, trail)
-        val arrow = line.arrow && room(true, hasTrail) >= need
-        val trail = hasTrail &&
-            (room(arrow, true) >= need || (room(arrow, false) < need && room(arrow, true) >= MIN_TITLE_DP))
-        val width = minOf(need + TITLE_RESERVE_DP, room(arrow, trail)).coerceAtLeast(MIN_PILL_DP)
-        return Fit(arrow, trail, width)
+        fun room(arrow: Boolean, icon: Boolean, trail: Boolean) = limit - others(arrow, icon, trail)
+        val arrow = line.arrow && room(true, hasIcon, hasTrail) >= need
+        val icon = hasIcon && room(arrow, true, hasTrail) >= need
+        val trail = hasTrail && (room(arrow, icon, true) >= need ||
+            (room(arrow, icon, false) < need && room(arrow, icon, true) >= MIN_TITLE_DP))
+        val width = minOf(need + TITLE_RESERVE_DP, room(arrow, icon, trail)).coerceAtLeast(MIN_PILL_DP)
+        return Fit(arrow, icon, trail, width)
     }
 
     /** Misst Texte wie die TextViews im Layout (16sp Monospace, leicht gesperrt), Ergebnis in dp. */
@@ -346,6 +398,47 @@ object SentenceUpdater {
             v.setViewVisibility(id, View.VISIBLE)
             v.setTextViewText(id, text)
         }
+    }
+
+    private fun setIcon(v: RemoteViews, id: Int, icon: Int?, p: WidgetUpdater.Palette) {
+        if (icon == null) {
+            v.setViewVisibility(id, View.GONE)
+        } else {
+            v.setViewVisibility(id, View.VISIBLE)
+            v.setImageViewResource(id, icon)
+            v.setColorStateList(id, "setImageTintList", p.text)
+        }
+    }
+
+    /** Symbol passend zum Terminnamen, sonst keins (dann bleibt mehr Platz für den Namen). */
+    private fun eventIcon(title: String): Int? {
+        val t = title.lowercase(Locale.GERMAN)
+        return EVENT_ICONS.firstOrNull { it.matches(t) }?.icon
+    }
+
+    /**
+     * Stichwörter je Symbol. [anywhere]: auch mitten im Wort („Restabfall“, „Kindergeburtstag“);
+     * sonst nur am Wortanfang, damit z. B. „Transport“ keine Hantel bekommt.
+     */
+    private class EventIcon(val icon: Int, val anywhere: Boolean, vararg words: String) {
+        private val patterns = words.map { Regex(if (anywhere) Regex.escape(it) else "(?<!\\p{L})" + Regex.escape(it)) }
+        fun matches(title: String) = patterns.any { it.containsMatchIn(title) }
+    }
+
+    private val EVENT_ICONS = listOf(
+        EventIcon(R.drawable.ic_s_trash, true, "müll", "abfall", "tonne", "gelber sack", "wertstoff"),
+        EventIcon(R.drawable.ic_s_cake, true, "geburtstag", "birthday"),
+        EventIcon(R.drawable.ic_s_medical, false, "arzt", "zahnarzt", "ärztin", "praxis", "physio", "klinik", "impf"),
+        EventIcon(R.drawable.ic_s_dumbbell, false, "training", "gym", "fitness", "sport", "workout", "joggen", "yoga", "schwimmen"),
+        EventIcon(R.drawable.ic_s_plane, false, "flug", "flight", "urlaub", "reise", "abflug"),
+        EventIcon(R.drawable.ic_s_food, false, "essen", "abendessen", "mittagessen", "frühstück", "dinner", "brunch", "lunch", "restaurant"),
+        EventIcon(R.drawable.ic_s_chat, false, "meeting", "call", "besprechung", "telefonat", "jour fixe", "sync", "interview"),
+    )
+
+    /** Mond abends und nachts (18–6 Uhr), sonst Sonne. */
+    private fun freeIcon(s: Snapshot): Int {
+        val hour = Instant.ofEpochMilli(s.now).atZone(s.zone).hour
+        return if (hour >= 18 || hour < 6) R.drawable.ic_s_moon else R.drawable.ic_s_sun
     }
 
     private fun styleOutline(v: RemoteViews, id: Int, p: WidgetUpdater.Palette) {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Symbol in Widget D: Besprechung / Anruf. Farbe kommt per Tint -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4.5,4.5 H15.5 Q17,4.5 17,6 V11.5 Q17,13 15.5,13 H9.5 L5.8,16 V13 H4.5 Q3,13 3,11.5 V6 Q3,4.5 4.5,4.5 Z" />
+</vector>
