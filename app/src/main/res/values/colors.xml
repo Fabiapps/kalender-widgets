@@ -69,7 +69,9 @@
 
     <!-- Hintergrund „Transparent“: keine Fläche, nur Schrift und Pillen -->
     <color name="bg_clear">#00000000</color>
-    <!-- Widget D bei „Transparent“: immer weiße Schrift (mit Schatten im Layout) -->
+    <!-- „Transparent“: immer weiße Schrift (mit Schatten im Layout), Punkte und Linien halb weiß -->
     <color name="clear_text">#FFFFFFFF</color>
     <color name="clear_muted">#D9FFFFFF</color>
+    <color name="clear_dot_off">#66FFFFFF</color>
+    <color name="clear_line">#66FFFFFF</color>
 </resources>

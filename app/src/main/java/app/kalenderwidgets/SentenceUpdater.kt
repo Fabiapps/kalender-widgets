@@ -118,15 +118,8 @@ object SentenceUpdater {
     )
 
     internal fun buildViews(context: Context, widgetId: Int, s: Snapshot, options: Bundle): RemoteViews {
-        val backdrop = WidgetPrefs.widgetBackdrop(context, widgetId)
-        val glass = backdrop == Backdrop.GLASS
-        val clear = backdrop == Backdrop.CLEAR
-        // Transparent: immer weiße Schrift mit Schatten (eigenes Layout), lesbar auf fast jedem Foto,
-        // unabhängig von Hell/Dunkel; gefüllte Pillen weiß mit dunkler Schrift
-        val p = WidgetUpdater.palette(context, widgetId).let {
-            if (clear) it.copy(text = R.color.clear_text, muted = R.color.clear_muted, inverse = R.color.month_selected_text)
-            else it
-        }
+        val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
+        val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 100 + 80
         val (lines, background) = if (s.hasPermission) {
             compose(context, s, base) to WidgetUpdater.calendarIntent(context, s.now, base)
@@ -137,7 +130,7 @@ object SentenceUpdater {
         val measure = Measure(context)
 
         fun views(size: SizeF): RemoteViews {
-            val v = RemoteViews(context.packageName, if (clear) R.layout.widget_sentence_clear else R.layout.widget_sentence)
+            val v = RemoteViews(context.packageName, if (p.clear) R.layout.widget_sentence_clear else R.layout.widget_sentence)
             v.setColorStateList(R.id.s_bg_fill, "setImageTintList", p.background)
             v.setViewVisibility(R.id.s_bg_frost, if (glass) View.VISIBLE else View.GONE)
             v.setImageViewResource(R.id.s_bg_frost, p.frost)

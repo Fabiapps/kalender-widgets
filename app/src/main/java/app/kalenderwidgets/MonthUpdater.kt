@@ -87,7 +87,7 @@ object MonthUpdater {
         val glass = WidgetPrefs.widgetBackdrop(context, widgetId) == Backdrop.GLASS
         val p = WidgetUpdater.palette(context, widgetId)
         val base = widgetId * 1000
-        val v = RemoteViews(context.packageName, R.layout.widget_month)
+        val v = RemoteViews(context.packageName, if (p.clear) R.layout.widget_month_clear else R.layout.widget_month)
 
         // Hintergrund und feste Farben
         v.setColorStateList(R.id.m_bg_fill, "setImageTintList", p.background)
@@ -190,7 +190,9 @@ object MonthUpdater {
         context: Context, e: CalEvent, day: LocalDate, dayStartMs: Long, dayEndMs: Long,
         zone: ZoneId, p: WidgetUpdater.Palette,
     ): RemoteViews {
-        val item = RemoteViews(context.packageName, R.layout.widget_month_event_item)
+        val item = RemoteViews(
+            context.packageName, if (p.clear) R.layout.widget_month_event_item_clear else R.layout.widget_month_event_item,
+        )
         item.setColorStateList(R.id.m_item_title, "setTextColor", p.text)
         item.setColorStateList(R.id.m_item_time, "setTextColor", p.muted)
         item.setColorStateList(R.id.m_item_tag, "setTextColor", p.muted)

@@ -134,10 +134,12 @@ object DayBarUpdater {
             layoutFooter(v, context, options, s, curLabel, curTitle, nextLabel, nextTitle, anchor, later, base + 6)
         }
 
-        val vC = RemoteViews(context.packageName, R.layout.widget_day_bar_compact)
+        val vC = RemoteViews(
+            context.packageName, if (p.clear) R.layout.widget_day_bar_compact_clear else R.layout.widget_day_bar_compact,
+        )
         applyAll(vC)
 
-        val vF = RemoteViews(context.packageName, R.layout.widget_day_bar)
+        val vF = RemoteViews(context.packageName, if (p.clear) R.layout.widget_day_bar_clear else R.layout.widget_day_bar)
         applyAll(vF)
 
         return RemoteViews(mapOf(
@@ -241,6 +243,7 @@ object DayBarUpdater {
         val bmp = Bitmap.createBitmap(widthPx.coerceAtLeast(1), heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         val linePaint = Paint().apply { color = context.getColor(p.line); strokeWidth = density; isAntiAlias = true }
+        shadowIfClear(linePaint, p, density)
         canvas.drawLine(0f, 9 * density, widthPx.toFloat(), 9 * density, linePaint)
         return bmp
     }
@@ -295,6 +298,11 @@ object DayBarUpdater {
         return result
     }
 
+    /** „Transparent“: derselbe weiche Schatten wie unter der Schrift (shadowRadius 4, shadowDy 1). */
+    private fun shadowIfClear(paint: Paint, p: WidgetUpdater.Palette, density: Float) {
+        if (p.clear) paint.setShadowLayer(4f, 0f, 1f, 0x99000000.toInt())
+    }
+
     private fun drawTimelineBitmap(
         context: Context, s: Snapshot, widthPx: Int, density: Float, p: WidgetUpdater.Palette,
     ): Bitmap {
@@ -323,6 +331,7 @@ object DayBarUpdater {
 
         // Basislinie
         val linePaint = Paint().apply { color = lineColor; strokeWidth = density; isAntiAlias = true }
+        shadowIfClear(linePaint, p, density)
         canvas.drawLine(0f, lineY, widthPx.toFloat(), lineY, linePaint)
 
         fun timeToX(ms: Long): Float =
@@ -333,6 +342,7 @@ object DayBarUpdater {
         val lanes = assignLanes(visible)
         val laneCenters = floatArrayOf(lineY, lineY + 7 * density, lineY + 11 * density)
         val barPaint = Paint().apply { isAntiAlias = true }
+        shadowIfClear(barPaint, p, density)
         visible.forEach { event ->
             val lane = lanes.getValue(event)
             val h = if (lane == 0) barH else subBarH
@@ -352,6 +362,7 @@ object DayBarUpdater {
         val nowBottom = if (lowest == 0) lineY + 7 * density else laneCenters[lowest] + subBarH / 2f + 1.5f * density
         val nowX = timeToX(s.now)
         val nowPaint = Paint().apply { color = accentColor; strokeWidth = 2 * density; isAntiAlias = true }
+        shadowIfClear(nowPaint, p, density)
         canvas.drawLine(nowX, lineY - 7 * density, nowX, nowBottom, nowPaint)
 
         // Stundenlabels an vollen Stunden (alle 3 Stunden), zentriert, am Rand nach innen geschoben
@@ -362,6 +373,7 @@ object DayBarUpdater {
             isAntiAlias = true
             textAlign = Paint.Align.CENTER
         }
+        shadowIfClear(labelPaint, p, density)
         val halfLabel = labelPaint.measureText("00") / 2f
         var hour = Instant.ofEpochMilli(windowStart).atZone(zone).truncatedTo(ChronoUnit.HOURS)
         while (hour.toInstant().toEpochMilli() <= windowEnd) {
